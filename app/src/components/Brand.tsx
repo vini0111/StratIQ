@@ -1,18 +1,5 @@
-// Aproximação do ícone de bússola/estrela do moodboard enviado (não é o
-// arquivo de logo original — se houver um SVG/PNG exportado do ícone, ele
-// deve substituir este componente para fidelidade exata).
-function CompassIcon({ size = 28 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
-      <polygon
-        points="50,2 60,42 98,50 60,58 50,98 40,58 2,50 40,42"
-        fill="var(--text)"
-        opacity="0.9"
-      />
-      <polygon points="50,15 56,46 87,50 56,54 50,85 44,54 13,50 44,46" fill="var(--accent)" />
-    </svg>
-  )
-}
+// Ícone real da marca (public/logo-icon.png), fornecido pelo usuário em 2026-07-03.
+// Servido como asset estático pelo Vite a partir de app/public/.
 
 export default function Brand({
   tagline,
@@ -24,7 +11,7 @@ export default function Brand({
   return (
     <div>
       <div className="brand">
-        <CompassIcon size={size} />
+        <img src="/logo-icon.png" width={size} height={size} alt="StratIQ" style={{ borderRadius: size * 0.22 }} />
         <span className="brand-wordmark">
           Strat<span className="accent">IQ</span>
         </span>

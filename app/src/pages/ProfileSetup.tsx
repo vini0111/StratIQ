@@ -22,17 +22,25 @@ const OBJECTIVES: { value: Objective; label: string }[] = [
 ]
 
 export default function ProfileSetup({
+  initialProfile,
   onSubmit,
+  onCancel,
   submitting,
 }: {
+  initialProfile?: Profile
   onSubmit: (profile: Omit<Profile, 'id' | 'createdAt'>) => void
+  onCancel?: () => void
   submitting: boolean
 }) {
-  const [stateNumber, setStateNumber] = useState<number>(0)
-  const [alliance, setAlliance] = useState('')
-  const [financialProfile, setFinancialProfile] = useState<FinancialProfile>('f2p')
-  const [objective, setObjective] = useState<Objective>('balanced')
-  const [hasSecondBuilder, setHasSecondBuilder] = useState(false)
+  const [stateNumber, setStateNumber] = useState<number>(initialProfile?.stateNumber ?? 0)
+  const [alliance, setAlliance] = useState(initialProfile?.alliance ?? '')
+  const [financialProfile, setFinancialProfile] = useState<FinancialProfile>(
+    initialProfile?.financialProfile ?? 'f2p'
+  )
+  const [objective, setObjective] = useState<Objective>(initialProfile?.objective ?? 'balanced')
+  const [hasSecondBuilder, setHasSecondBuilder] = useState(initialProfile?.hasSecondBuilder ?? false)
+
+  const isEditing = !!initialProfile
 
   return (
     <form
@@ -43,10 +51,11 @@ export default function ProfileSetup({
       }}
     >
       <Brand size={24} />
-      <h1 style={{ marginTop: 20 }}>Configuração inicial</h1>
+      <h1 style={{ marginTop: 20 }}>{isEditing ? 'Editar perfil' : 'Configuração inicial'}</h1>
       <p className="muted">
-        Só o essencial para personalizar as recomendações. Sem cadastro extenso — isso não é
-        onboarding de várias telas, é preenchido uma vez e pronto.
+        {isEditing
+          ? 'Ajuste o que mudou desde o cadastro inicial (ex.: desbloqueou o 2º construtor, trocou de aliança).'
+          : 'Só o essencial para personalizar as recomendações. Sem cadastro extenso — isso não é onboarding de várias telas, é preenchido uma vez e pronto.'}
       </p>
 
       <label>Número do estado</label>
@@ -92,8 +101,13 @@ export default function ProfileSetup({
       </label>
 
       <button type="submit" disabled={submitting}>
-        {submitting ? 'Salvando...' : 'Começar'}
+        {submitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Começar'}
       </button>
+      {isEditing && onCancel && (
+        <button type="button" className="secondary" style={{ marginLeft: 8 }} onClick={onCancel}>
+          Cancelar
+        </button>
+      )}
     </form>
   )
 }

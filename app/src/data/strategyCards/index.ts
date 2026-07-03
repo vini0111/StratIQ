@@ -26,6 +26,7 @@ import researchTreeGrowthFirst from './research_tree_growth_first.json'
 import f2pHeroPriorityFlint from './f2p_hero_priority_flint.json'
 import f2pHeroPriorityBlanchette from './f2p_hero_priority_blanchette.json'
 import f2pHeroPriorityEleonora from './f2p_hero_priority_eleonora.json'
+import zinmanUtilityPriority from './zinman_utility_priority.json'
 
 export const strategyCards = [
   saveGemsBaselineReserve,
@@ -48,4 +49,5 @@ export const strategyCards = [
   f2pHeroPriorityFlint,
   f2pHeroPriorityBlanchette,
   f2pHeroPriorityEleonora,
+  zinmanUtilityPriority,
 ] as unknown as StrategyCard[]

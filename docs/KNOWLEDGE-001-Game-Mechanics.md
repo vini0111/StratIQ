@@ -58,6 +58,34 @@ Para jogadores pagantes, os guias citam Vulcanus (Gen 13) e Estrella (Gen 15) co
 
 Fonte: [gamsgo — Hero Tier List 2026](https://www.gamsgo.com/blog/whiteout-survival-hero-tier-list), [AllClash — Best Heroes Tier List 2026](https://www.allclash.com/best-heroes-in-whiteout-survival-tier-list/)
 
+### Roster do Estado 4465 (2026-07-03)
+
+Heróis confirmados disponíveis para o jogador (Furnace 17). Confiança **alta** = múltiplas fontes convergentes; **média** = uma fonte razoável; **baixa/não confirmado** = nome ambíguo ou sem fonte clara — tratar como hipótese, não fato.
+
+| Herói | Classe | Raridade | Papel | Confiança |
+|---|---|---|---|---|
+| Molly | Lancer | SSR | Combate | Alta |
+| Sergey | Infantry | SR | Combate | Alta |
+| Natalia | Infantry | SSR | Combate | Alta |
+| Jerónimo | Infantry | SSR | Combate | Média |
+| Jessie | Lancer | Epic/SR | Combate | Alta |
+| Bahiti | Marksman | — | Combate (grátis na Fornalha 4) | Alta |
+| Gina | Marksman | — | Combate | Média |
+| Cloris | Marksman | Rare | Combate | Média |
+| Jasser | Marksman | — | Combate | Média |
+| Seo-yoon | Marksman | SR | Combate | Média |
+| Patrick | Infantry | provável Epic/SSR (A-tier) | Combate | Média |
+| Ling Xue | — | Epic | Combate (dano em área) | Baixa |
+| **Zinman** | Marksman | — | **Utilidade/Economia** (SSS tier — reduz tempo de construção/pesquisa, não é herói de dano) | Média |
+| Charlie | — | Rare | Provavelmente Economia/Coleta | Baixa |
+| Eugenio | — | Rare (hipótese: variante PT-BR de "Eugene") | Provavelmente Economia/Coleta | Baixa, não confirmado |
+| Smith | — | Rare | Baixo tier — papel não confirmado | Baixa |
+| Lumak Bokan | — | — | Não confirmado (possível variante de "Walis Bokan", Lancer/Epic, mas nomes não batem com certeza) | Não confirmado |
+
+Destaque: **Zinman** aparece consistentemente como tier SSS/top, mas por uma habilidade de utilidade (redução de tempo de construção/pesquisa), não por dano — vale tratá-lo separado dos heróis de combate ao priorizar investimento.
+
+Fonte: busca dirigida por nome em julho/2026 (BlueStacks, Theria Games, Whiteout Survival Wiki, Medium/Medieval Fun, One Chilled Gamer, gamestouse.com — ver linhas de conversa para URLs específicas por herói). Não é uma fonte única consolidada — tratar como ponto de partida, não verdade definitiva. Charlie, Eugenio, Smith e Lumak Bokan merecem confirmação in-game antes de qualquer decisão baseada neles.
+
 ## Open question para o futuro
 
 Vários guias amarram geração de herói recomendada à **idade do servidor** (dias desde a criação do estado) — não coletamos esse campo hoje. Fica registrado como candidato a novo campo do snapshot (ver BACKLOG-v1), não implementado agora para não expandir o formulário sem necessidade validada.

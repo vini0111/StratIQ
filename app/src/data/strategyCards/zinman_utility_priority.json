@@ -1,0 +1,11 @@
+{
+  "id": "ZINMAN_UTILITY_PRIORITY",
+  "name": "Priorizar Zinman (utilidade, não dano)",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [{ "field": "heroes", "op": "heroNamedBelowStars", "value": "Zinman:4" }],
+  "recommendation": "Zinman aparece como um dos heróis mais valiosos disponíveis no seu estado — mas pela habilidade de reduzir tempo de construção/pesquisa, não por dano. Vale priorizar fragmentos dele mesmo sem ser uma prioridade de combate.",
+  "explanation": "Guias consistentemente colocam Zinman em tier máximo por utilidade (redução de tempo), não por ser herói de dano — fácil de subestimar se avaliado só pelas estatísticas de batalha. Confiança média: fonte por busca dirigida, não verificação in-game. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Roster do Estado 4465).",
+  "impact": "medium",
+  "confidence": 0.55
+}

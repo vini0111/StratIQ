@@ -13,6 +13,7 @@ export default function App() {
   const [loadingSession, setLoadingSession] = useState(true)
   const [loadingProfile, setLoadingProfile] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
+  const [editingProfile, setEditingProfile] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -63,6 +64,20 @@ export default function App() {
     }
   }
 
+  async function handleUpdateProfile(draft: Omit<Profile, 'id' | 'createdAt'>) {
+    if (!session) return
+    setSavingProfile(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update(profileToRow(draft, session.user.id))
+      .eq('id', session.user.id)
+    setSavingProfile(false)
+    if (!error) {
+      await loadProfile(session.user.id)
+      setEditingProfile(false)
+    }
+  }
+
   if (loadingSession) return null
 
   if (!session) return <Login />
@@ -73,5 +88,16 @@ export default function App() {
     return <ProfileSetup onSubmit={handleCreateProfile} submitting={savingProfile} />
   }
 
-  return <Dashboard profile={profile} />
+  if (editingProfile) {
+    return (
+      <ProfileSetup
+        initialProfile={profile}
+        onSubmit={handleUpdateProfile}
+        onCancel={() => setEditingProfile(false)}
+        submitting={savingProfile}
+      />
+    )
+  }
+
+  return <Dashboard profile={profile} onEditProfile={() => setEditingProfile(true)} />
 }

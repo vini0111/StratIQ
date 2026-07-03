@@ -53,16 +53,28 @@ export const KNOWN_RESEARCH = [
   'Capacidade de Treinamento',
 ]
 
-// Caminho de prioridade F2P (KNOWLEDGE-001) + heróis de referência para
-// jogadores pagantes — lista curta e propositalmente incompleta.
+// Roster real disponível no Estado 4465 (informado pelo jogador em
+// 2026-07-03) — substitui a lista anterior (caminho F2P late-game), que
+// incluía heróis de gerações que esse estado ainda não tem. Ver detalhes de
+// classe/raridade/geração em docs/KNOWLEDGE-001-Game-Mechanics.md.
+// Lista ainda parcial: reflete o que está disponível hoje, não o roster
+// completo do jogo — outros estados/gerações terão heróis diferentes.
 export const KNOWN_HEROES = [
-  'Mia',
-  'Hector',
-  'Bradley',
-  'Gatot',
-  'Blanchette',
-  'Eleonora',
-  'Flint',
-  'Vulcanus',
-  'Estrella',
+  'Molly',
+  'Bahiti',
+  'Sergey',
+  'Gina',
+  'Cloris',
+  'Jessie',
+  'Charlie',
+  'Natalia',
+  'Jasser',
+  'Lumak Bokan',
+  'Patrick',
+  'Eugenio',
+  'Seo-yoon',
+  'Smith',
+  'Ling Xue',
+  'Jerónimo',
+  'Zinman',
 ]

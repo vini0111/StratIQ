@@ -11,7 +11,13 @@ import HistorySparkline from '../components/HistorySparkline'
 import HistoryTable from '../components/HistoryTable'
 import Brand from '../components/Brand'
 
-export default function Dashboard({ profile }: { profile: Profile }) {
+export default function Dashboard({
+  profile,
+  onEditProfile,
+}: {
+  profile: Profile
+  onEditProfile: () => void
+}) {
   const [snapshots, setSnapshots] = useState<WeeklySnapshot[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -78,7 +84,21 @@ export default function Dashboard({ profile }: { profile: Profile }) {
     <div>
       <Brand size={24} />
       <p className="muted" style={{ marginTop: 6, marginBottom: 20 }}>
-        Estado {profile.stateNumber} · {profile.alliance || 'sem aliança'}
+        Estado {profile.stateNumber} · {profile.alliance || 'sem aliança'} ·{' '}
+        <button
+          type="button"
+          onClick={onEditProfile}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--accent)',
+            padding: 0,
+            font: 'inherit',
+            cursor: 'pointer',
+          }}
+        >
+          editar perfil
+        </button>
       </p>
 
       {error && (

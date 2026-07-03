@@ -5,10 +5,10 @@
   "priority": "high",
   "conditions": [
     { "field": "gems", "op": "lt", "value": "$derived.reserveThreshold" },
-    { "field": "currentEvents", "op": "neq", "value": "Lucky Wheel" }
+    { "field": "currentEvents", "op": "neq", "value": "Roda da Sorte" }
   ],
   "recommendation": "Não gaste gemas esta semana. Sua reserva está abaixo do mínimo recomendado para o seu perfil.",
-  "explanation": "Perfis com menor investimento dependem mais da reserva de gemas para aproveitar eventos como a Lucky Wheel e evitar gastos por impulso fora deles.",
+  "explanation": "Perfis com menor investimento dependem mais da reserva de gemas para aproveitar eventos como a Roda da Sorte e evitar gastos por impulso fora deles.",
   "impact": "high",
   "confidence": 0.8
 }

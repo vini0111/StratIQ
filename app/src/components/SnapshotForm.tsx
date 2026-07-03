@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { HeroEntry, Profile, WeeklySnapshot } from '../types'
-import { KNOWN_BUILDINGS, KNOWN_EVENTS, KNOWN_RESEARCH } from '../data/knownOptions'
+import { KNOWN_BUILDINGS, KNOWN_EVENTS, KNOWN_HEROES, KNOWN_RESEARCH } from '../data/knownOptions'
+import { ACCELERATOR_UNIT_LABELS, AcceleratorUnit, toDecimalDays } from '../lib/accelerators'
 import AcceleratorInput from './AcceleratorInput'
 
 type DraftSnapshot = Omit<WeeklySnapshot, 'id' | 'profileId' | 'createdAt'>
@@ -25,6 +26,14 @@ const blankDraft: DraftSnapshot = {
   currentBuilding: '',
   currentBuilding2: '',
   weeklyQuestion: '',
+}
+
+const emptyAcceleratorAmounts = {
+  general: 0,
+  training: 0,
+  construction: 0,
+  research: 0,
+  healing: 0,
 }
 
 // Pré-preenche com os dados persistentes do último check-in (fornalha, VIP,
@@ -61,9 +70,15 @@ export default function SnapshotForm({
   const [draft, setDraft] = useState<DraftSnapshot>(() => buildInitialDraft(lastSnapshot))
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [customEventsText, setCustomEventsText] = useState('')
+  const [acceleratorUnit, setAcceleratorUnit] = useState<AcceleratorUnit>('days')
+  const [acceleratorAmounts, setAcceleratorAmounts] = useState(emptyAcceleratorAmounts)
 
   function update<K extends keyof DraftSnapshot>(key: K, value: DraftSnapshot[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }))
+  }
+
+  function updateAccelerator(key: keyof typeof emptyAcceleratorAmounts, amount: number) {
+    setAcceleratorAmounts((prev) => ({ ...prev, [key]: amount }))
   }
 
   function toggleEvent(name: string) {
@@ -99,6 +114,11 @@ export default function SnapshotForm({
           .filter(Boolean)
         onSubmit({
           ...draft,
+          accelGeneralDays: toDecimalDays(acceleratorAmounts.general, acceleratorUnit),
+          accelTrainingDays: toDecimalDays(acceleratorAmounts.training, acceleratorUnit),
+          accelConstructionDays: toDecimalDays(acceleratorAmounts.construction, acceleratorUnit),
+          accelResearchDays: toDecimalDays(acceleratorAmounts.research, acceleratorUnit),
+          accelHealingDays: toDecimalDays(acceleratorAmounts.healing, acceleratorUnit),
           currentEvents: [...selectedEvents, ...customEvents],
           heroes: draft.heroes.filter((h) => h.name.trim().length > 0),
         })
@@ -188,27 +208,53 @@ export default function SnapshotForm({
         value={draft.power}
         onChange={(e) => update('power', Number(e.target.value))}
       />
-      <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
-        Se a fornalha estiver em upgrade, isso já aparece em "Construção atual" abaixo — não é
-        preciso indicar progresso separado.
-      </p>
 
       <label>Aceleradores disponíveis agora</label>
-      <p className="muted" style={{ marginTop: -8, marginBottom: 8, fontSize: 12 }}>
-        Mesma ordem do jogo. Escolha a unidade (dias, horas ou minutos) e informe a quantidade
-        nela — não precisa converter.
-      </p>
-      <AcceleratorInput label="Aceleração Geral" onChange={(v) => update('accelGeneralDays', v)} />
-      <AcceleratorInput
-        label="Treinamento de tropas"
-        onChange={(v) => update('accelTrainingDays', v)}
-      />
-      <AcceleratorInput
-        label="Construção"
-        onChange={(v) => update('accelConstructionDays', v)}
-      />
-      <AcceleratorInput label="Pesquisa" onChange={(v) => update('accelResearchDays', v)} />
-      <AcceleratorInput label="Cura" onChange={(v) => update('accelHealingDays', v)} />
+      <div style={{ marginBottom: 8 }}>
+        <label className="muted">Unidade (vale para todos abaixo)</label>
+        <select
+          value={acceleratorUnit}
+          onChange={(e) => setAcceleratorUnit(e.target.value as AcceleratorUnit)}
+        >
+          {(Object.keys(ACCELERATOR_UNIT_LABELS) as AcceleratorUnit[]).map((u) => (
+            <option key={u} value={u}>
+              {ACCELERATOR_UNIT_LABELS[u]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="grid-2">
+        <AcceleratorInput
+          label="Aceleração Geral"
+          value={acceleratorAmounts.general}
+          onChange={(v) => updateAccelerator('general', v)}
+        />
+        <AcceleratorInput
+          label="Treinamento de tropas"
+          value={acceleratorAmounts.training}
+          onChange={(v) => updateAccelerator('training', v)}
+        />
+      </div>
+      <div className="grid-2">
+        <AcceleratorInput
+          label="Construção"
+          value={acceleratorAmounts.construction}
+          onChange={(v) => updateAccelerator('construction', v)}
+        />
+        <AcceleratorInput
+          label="Pesquisa"
+          value={acceleratorAmounts.research}
+          onChange={(v) => updateAccelerator('research', v)}
+        />
+      </div>
+      <div className="grid-2">
+        <AcceleratorInput
+          label="Cura"
+          value={acceleratorAmounts.healing}
+          onChange={(v) => updateAccelerator('healing', v)}
+        />
+        <div />
+      </div>
 
       <div className="grid-2">
         <div>
@@ -256,12 +302,18 @@ export default function SnapshotForm({
           <option key={r} value={r} />
         ))}
       </datalist>
+      <datalist id="heroes-list">
+        {KNOWN_HEROES.map((h) => (
+          <option key={h} value={h} />
+        ))}
+      </datalist>
 
       <label>Heróis favoritos</label>
       {draft.heroes.map((hero, i) => (
         <div className="hero-row" key={i}>
           <input
             type="text"
+            list="heroes-list"
             placeholder="Nome"
             value={hero.name}
             onChange={(e) => updateHero(i, { name: e.target.value })}

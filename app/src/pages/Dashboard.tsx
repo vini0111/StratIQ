@@ -24,11 +24,16 @@ export default function Dashboard({ profile }: { profile: Profile }) {
 
   async function loadSnapshots() {
     setLoading(true)
+    // Ordena por created_at (timestamp completo), não por snapshot_date.
+    // snapshot_date é só a data escolhida no formulário (granularidade de
+    // dia) — com múltiplos check-ins no mesmo dia (comum em teste), ordenar
+    // só por ela não garante qual é realmente o mais recente. created_at
+    // sempre reflete a ordem real de inserção.
     const { data, error } = await supabase
       .from('weekly_snapshots')
       .select('*')
       .eq('profile_id', profile.id)
-      .order('snapshot_date', { ascending: true })
+      .order('created_at', { ascending: true })
 
     if (error) {
       console.error('Falha ao carregar snapshots:', error)
@@ -72,7 +77,7 @@ export default function Dashboard({ profile }: { profile: Profile }) {
   return (
     <div>
       <Brand size={24} />
-      <p className="muted" style={{ marginTop: -12, marginBottom: 20 }}>
+      <p className="muted" style={{ marginTop: 6, marginBottom: 20 }}>
         Estado {profile.stateNumber} · {profile.alliance || 'sem aliança'}
       </p>
 

@@ -1,13 +1,13 @@
 {
   "id": "SPEND_GEMS_LUCKY_WHEEL",
-  "name": "Girar a Lucky Wheel",
+  "name": "Girar a Roda da Sorte",
   "domain": "economy",
   "priority": "very_high",
   "conditions": [
-    { "field": "currentEvents", "op": "eq", "value": "Lucky Wheel" },
+    { "field": "currentEvents", "op": "eq", "value": "Roda da Sorte" },
     { "field": "gems", "op": "gte", "value": 159000 }
   ],
-  "recommendation": "Você tem gemas suficientes para maximizar a Lucky Wheel (120 giros = 159.000 gemas). Se for F2P/low spender, considere parar em 4 estrelas do herói — a 5ª estrela rende pouco a mais e as gemas restantes valem mais guardadas.",
+  "recommendation": "Você tem gemas suficientes para maximizar a Roda da Sorte (120 giros = 159.000 gemas). Se for F2P/low spender, considere parar em 4 estrelas do herói — a 5ª estrela rende pouco a mais e as gemas restantes valem mais guardadas.",
   "explanation": "120 giros custam 159.000 gemas no total (1.500/giro avulso, ou 13.500 a cada 10 giros). Marcos de recompensa em 5, 15, 35, 70 e 120 giros. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Lucky Wheel).",
   "impact": "high",
   "confidence": 0.85

@@ -1,0 +1,14 @@
+{
+  "id": "IDLE_CONSTRUCTION_QUEUE_2",
+  "name": "Fila do 2º construtor ociosa",
+  "domain": "growth",
+  "priority": "very_high",
+  "conditions": [
+    { "field": "profile.hasSecondBuilder", "op": "eq", "value": true },
+    { "field": "currentBuilding2", "op": "eq", "value": "" }
+  ],
+  "recommendation": "Seu 2º construtor está ocioso. Inicie uma construção nele também.",
+  "explanation": "Com dois construtores, cada um parado é desperdício de progresso equivalente ao de ter um único construtor ocioso.",
+  "impact": "high",
+  "confidence": 0.95
+}

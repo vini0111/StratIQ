@@ -1,0 +1,11 @@
+{
+  "id": "IDLE_CONSTRUCTION_QUEUE",
+  "name": "Fila de construção ociosa",
+  "domain": "growth",
+  "priority": "very_high",
+  "conditions": [{ "field": "currentBuilding", "op": "eq", "value": "" }],
+  "recommendation": "Sua fila de construção está vazia. Inicie uma construção ainda hoje.",
+  "explanation": "Fila parada é a forma mais comum de desperdício de progresso em jogos baseados em filas de tempo.",
+  "impact": "high",
+  "confidence": 0.95
+}

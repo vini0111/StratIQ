@@ -1,0 +1,14 @@
+{
+  "id": "F2P_HERO_PRIORITY_FLINT",
+  "name": "Priorizar Flint (1º power spike F2P)",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [
+    { "field": "heroes", "op": "heroNamedBelowStars", "value": "Flint:4" },
+    { "field": "profile.financialProfile", "op": "in", "value": ["f2p", "low_spender"] }
+  ],
+  "recommendation": "Flint (Geração 2, obtido via Lucky Wheel) é citado como o primeiro grande power spike para jogadores F2P. Vale priorizar fragmentos dele até pelo menos 4 estrelas.",
+  "explanation": "Guias de heróis F2P consistentemente colocam Flint como o primeiro herói que vale investir gemas de Lucky Wheel guardadas. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Heróis).",
+  "impact": "medium",
+  "confidence": 0.55
+}

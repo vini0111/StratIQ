@@ -1,0 +1,11 @@
+{
+  "id": "FROSTFIRE_SOLO_PREP",
+  "name": "Frostfire é evento solo",
+  "domain": "events",
+  "priority": "low",
+  "conditions": [{ "field": "currentEvents", "op": "contains", "value": "Frostfire" }],
+  "recommendation": "Frostfire é um dos poucos eventos solo do jogo — dura só ~30 minutos numa zona de combate dedicada. Prepare seu melhor herói/tropa individual antes da janela abrir, não conte com apoio de aliança.",
+  "explanation": "Ao contrário da maioria dos eventos (que são de aliança), Frostfire recompensa desempenho individual num combate curto. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Frostfire).",
+  "impact": "low",
+  "confidence": 0.6
+}

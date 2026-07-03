@@ -1,0 +1,11 @@
+{
+  "id": "POWER_STAGNATION",
+  "name": "Poder estagnado desde a última atualização",
+  "domain": "battle",
+  "priority": "medium",
+  "conditions": [{ "field": "derived.powerDelta", "op": "lte", "value": 0 }],
+  "recommendation": "Seu poder não cresceu desde o último check-in. Revise se construção, pesquisa e treino estão realmente em andamento.",
+  "explanation": "Estagnação de poder geralmente indica filas ociosas ou recursos parados, não falta de oportunidade de crescer.",
+  "impact": "medium",
+  "confidence": 0.6
+}

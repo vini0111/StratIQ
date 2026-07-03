@@ -1,0 +1,14 @@
+{
+  "id": "F2P_HERO_PRIORITY_BLANCHETTE",
+  "name": "Priorizar Blanchette (melhor dano F2P)",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [
+    { "field": "heroes", "op": "heroNamedBelowStars", "value": "Blanchette:4" },
+    { "field": "profile.financialProfile", "op": "in", "value": ["f2p", "low_spender"] }
+  ],
+  "recommendation": "Blanchette (Geração 10, marksman, via Lucky Wheel) é apontada como a melhor dano-causadora do jogo e um dos poucos heróis S+ realmente acessíveis a F2P. Vale priorizar.",
+  "explanation": "Múltiplos tier lists atuais colocam Blanchette no topo entre heróis acessíveis sem gastar dinheiro. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Heróis).",
+  "impact": "high",
+  "confidence": 0.55
+}

@@ -1,0 +1,11 @@
+{
+  "id": "ACCELERATOR_HOARDING_RESEARCH",
+  "name": "Evitar acúmulo de aceleradores de pesquisa",
+  "domain": "economy",
+  "priority": "medium",
+  "conditions": [{ "field": "accelResearchDays", "op": "gt", "value": 20 }],
+  "recommendation": "Você tem mais de 20 dias de aceleradores de pesquisa parados. Use parte deles na pesquisa atual.",
+  "explanation": "Aceleradores acumulados não geram valor; o objetivo é mantê-los em uso constante, não guardados indefinidamente.",
+  "impact": "medium",
+  "confidence": 0.7
+}

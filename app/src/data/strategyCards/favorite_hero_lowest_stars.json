@@ -1,0 +1,11 @@
+{
+  "id": "FAVORITE_HERO_LOWEST_STARS",
+  "name": "Investir no herói favorito mais atrasado",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [{ "field": "heroes", "op": "anyHeroBelowStars", "value": 3 }],
+  "recommendation": "Ao menos um dos seus heróis favoritos está abaixo de 3 estrelas. Priorize fragmentos para ele antes de espalhar recursos entre vários heróis.",
+  "explanation": "Concentrar fragmentos em poucos heróis gera poder útil mais rápido do que distribuir entre muitos heróis parcialmente evoluídos.",
+  "impact": "medium",
+  "confidence": 0.65
+}

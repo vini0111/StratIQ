@@ -1,0 +1,14 @@
+{
+  "id": "F2P_HERO_PRIORITY_ELEONORA",
+  "name": "Priorizar Eleonora (staple de late-game)",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [
+    { "field": "heroes", "op": "heroNamedBelowStars", "value": "Eleonora:4" },
+    { "field": "profile.financialProfile", "op": "in", "value": ["f2p", "low_spender"] }
+  ],
+  "recommendation": "Eleonora (Geração 11, via Lucky Wheel) tem um kit de utilidade forte em rallies de PvP, Arena e Expedição. É citada como investimento de longo prazo sólido para builds de infantaria F2P.",
+  "explanation": "Guias recentes a colocam como staple de late-game acessível via Lucky Wheel, sem necessidade de gasto. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Heróis).",
+  "impact": "medium",
+  "confidence": 0.5
+}

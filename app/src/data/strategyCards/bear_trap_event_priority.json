@@ -1,0 +1,14 @@
+{
+  "id": "BEAR_TRAP_EVENT_PRIORITY",
+  "name": "Priorizar Bear Trap",
+  "domain": "events",
+  "priority": "high",
+  "conditions": [
+    { "field": "profile.objective", "op": "eq", "value": "bear_trap" },
+    { "field": "currentEvents", "op": "contains", "value": "Bear" }
+  ],
+  "recommendation": "Bear Trap é seu objetivo principal e está ativo agora. Direcione recursos e aceleradores para esta semana.",
+  "explanation": "Alinhar o objetivo declarado do jogador com o evento ativo evita dispersão de recursos em eventos secundários.",
+  "impact": "high",
+  "confidence": 0.8
+}

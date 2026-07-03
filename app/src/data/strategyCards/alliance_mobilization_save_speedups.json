@@ -1,0 +1,11 @@
+{
+  "id": "ALLIANCE_MOBILIZATION_SAVE_SPEEDUPS",
+  "name": "Não gastar aceleradores grandes na Mobilização",
+  "domain": "events",
+  "priority": "high",
+  "conditions": [{ "field": "currentEvents", "op": "contains", "value": "Mobiliza" }],
+  "recommendation": "Não use aceleradores grandes nem upgrades de equipamento na Mobilização da Aliança. Guarde para a SvS, que ocorre a cada 4 semanas.",
+  "explanation": "A Mobilização da Aliança é um evento de 6 dias que recompensa pontos por missões; usar aceleradores grandes aqui compete diretamente com a SvS, que os aproveita muito melhor. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Alliance Mobilization).",
+  "impact": "high",
+  "confidence": 0.75
+}

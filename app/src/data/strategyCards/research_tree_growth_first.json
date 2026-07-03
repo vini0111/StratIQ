@@ -1,0 +1,11 @@
+{
+  "id": "RESEARCH_TREE_GROWTH_FIRST",
+  "name": "Priorizar árvore de Crescimento no early game",
+  "domain": "growth",
+  "priority": "medium",
+  "conditions": [{ "field": "furnaceLevel", "op": "lt", "value": 15 }],
+  "recommendation": "Nesta fase inicial, priorize a árvore Growth do Centro de Pesquisa antes de Battle e Economy — especialmente 'Tool Enhancement' (reduz tempo de pesquisa). O efeito composto ao longo do jogo é grande.",
+  "explanation": "A ordem mais citada pelos guias é Growth → Battle → Economy, migrando o foco para Economy só quando a tecnologia de batalha já acompanha o nível competitivo do estado. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Pesquisa).",
+  "impact": "medium",
+  "confidence": 0.6
+}

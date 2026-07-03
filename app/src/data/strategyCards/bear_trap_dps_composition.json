@@ -1,0 +1,11 @@
+{
+  "id": "BEAR_TRAP_DPS_COMPOSITION",
+  "name": "Priorizar composição DPS no Bear Trap",
+  "domain": "battle",
+  "priority": "medium",
+  "conditions": [{ "field": "currentEvents", "op": "contains", "value": "Bear" }],
+  "recommendation": "No Bear Trap, composição balanceada de tropas perde dano. Priorize Marksmen (maior dano sustentado) em vez de uma formação equilibrada.",
+  "explanation": "O Bear Trap recompensa dano total em ~30 minutos, não durabilidade. Guias consistentemente apontam Marksmen como a melhor fonte de DPS sustentado no evento. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Bear Trap).",
+  "impact": "medium",
+  "confidence": 0.65
+}

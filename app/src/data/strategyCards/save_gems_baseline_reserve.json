@@ -1,0 +1,14 @@
+{
+  "id": "SAVE_GEMS_BASELINE_RESERVE",
+  "name": "Manter reserva mínima de gemas",
+  "domain": "economy",
+  "priority": "high",
+  "conditions": [
+    { "field": "gems", "op": "lt", "value": "$derived.reserveThreshold" },
+    { "field": "currentEvents", "op": "neq", "value": "Lucky Wheel" }
+  ],
+  "recommendation": "Não gaste gemas esta semana. Sua reserva está abaixo do mínimo recomendado para o seu perfil.",
+  "explanation": "Perfis com menor investimento dependem mais da reserva de gemas para aproveitar eventos como a Lucky Wheel e evitar gastos por impulso fora deles.",
+  "impact": "high",
+  "confidence": 0.8
+}

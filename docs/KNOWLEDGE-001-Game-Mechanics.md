@@ -115,7 +115,24 @@ Fonte: busca dirigida por nome em julho/2026 (BlueStacks, Theria Games, Whiteout
 
 Três tipos, ciclo de contra-ataque tipo pedra-papel-tesoura: **Infantaria vence Lanceiro → Lanceiro vence Atirador → Atirador vence Infantaria** (cada vantagem = ~10-20% de bônus de ataque/redução de dano, dependendo da fonte). Atirador é a principal fonte de dano do jogo, mas depende de Infantaria/Lanceiro para absorver dano na frente.
 
-Tiers vão de **T1 a T12**: cada tier melhora status de combate, pontos de evento e custo/tempo de treino. T11 exige a construção War Academy; T12 ("Exalted") exige War Academy + Fire Crystal FC10 e pesquisas Exalted. Na prática, a maioria dos jogadores ativos treina/promove principalmente T10/T11 — promover um tier já treinado costuma ser muito mais barato em tempo do que treinar do zero no tier novo.
+Tiers vão de **I a XII** (não são só um número — cada tier tem nome próprio no jogo): cada tier melhora status de combate, pontos de evento e custo/tempo de treino. XI (Helios) e XII (Exalted) só existem via pesquisa na War Academy (XII exige também Fire Crystal FC10). Na prática, a maioria dos jogadores ativos treina/promove principalmente os tiers mais altos que já tem — promover um tier já treinado costuma ser muito mais barato em tempo do que treinar do zero no tier novo.
+
+| Tier | Nome (Infantaria, referência) | Desbloqueio |
+|---|---|---|
+| I | Rookie | Acampamento nível 1 |
+| II | Trained | Acampamento nível 4 |
+| III | Senior | Acampamento nível 7 |
+| IV | Veteran | Acampamento nível 11 |
+| V | **Resistente** ✅ confirmado pelo jogador | Acampamento nível 13 |
+| VI | **Heróica** ✅ confirmado pelo jogador | Acampamento nível 16 |
+| VII | Brave | Acampamento nível 19 |
+| VIII | Elite | Acampamento nível 22 |
+| IX | Supreme | Acampamento nível 26 |
+| X | Apex | Acampamento nível 30 |
+| XI | Helios | Pesquisa na War Academy |
+| XII | Exalted | War Academy + Fire Crystal FC10 |
+
+Nomes V e VI confirmados em PT pelo próprio jogador (2026-07-03: "Infantaria Heróica nível VI", "Infantaria Resistente nível V"). Os demais nomes na tabela são o termo em inglês (fonte em inglês) — ainda **não confirmados** contra o cliente em PT do jogador; corrigir se divergirem do texto real na tela. Os nomes provavelmente variam entre Infantaria/Lanceiro/Atirador (cada tipo tem seu próprio conjunto de nomes de tier), o que não foi pesquisado ainda — o app trata o tier como texto livre com sugestão (datalist), então isso não bloqueia o uso, só a precisão do rótulo sugerido.
 
 Proporções de composição citadas pelos guias (ajustáveis por objetivo, não uma regra fixa):
 - Balanceada/geral: **50% Infantaria / 20% Lanceiro / 30% Atirador**
@@ -123,9 +140,34 @@ Proporções de composição citadas pelos guias (ajustáveis por objetivo, não
 - Foco em sobrevivência (defesa): 60% Infantaria / 20% / 20%
 - Armadilha do Urso (Bear Trap): fortemente concentrada em Atirador — até 80% se disponível, ou 60% como alternativa (10/10/80 ou 20/20/60)
 
-MVP do StratIQ (2026-07-03) coleta só o total por tipo (Infantaria/Lanceiro/Atirador) + tier mais alto em treino no momento — sem granularidade por tier individual (custo de preenchimento semanal vs. valor da recomendação; ver BACKLOG-v1 item C). `derived.troopCompositionPct` e `derived.totalTroops`/`derived.troopsDelta` no motor usam esses totais para comparar contra as proporções de referência acima.
+MVP do StratIQ (2026-07-03, revisado na sexta rodada) coleta uma lista de linhas **tipo + tier + quantidade** (`troopEntries`), porque o jogo mostra as tropas por tier dentro de cada tipo (ex.: "Infantaria Heróica nível VI: 7.848"), nunca um total único agregado — a primeira versão pedia só um total por tipo, o que não batia com a tela real do jogo. O motor (`sumTroopsByType` em `strategyEngine.ts`) soma as linhas por tipo para calcular `derived.totalTroops`, `derived.troopCompositionPct` e `derived.troopsDelta`, que alimentam as Strategy Cards de composição/estagnação sem mudança de lógica.
 
 Fonte: [One Chilled Gamer — Troop Guide](https://onechilledgamer.com/whiteout-survival-troop-guide/), [WoS Tools Wiki — Troops](https://wostools.net/wiki/troops), [BlueStacks — War Academy/T11 Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-troops-upgrade-guide-en.html), [A Jack Of — Best Troop Formation & Ratio](https://www.ajackof.com/games/whiteout-survival-wos/whiteout-survival-best-troop-formation-ratio/), [topuplive.com — Troop Types, Ratios & Recommendations](https://www.topuplive.com/news/whiteout-survival-troops-guide.html).
+
+## VIP — XP necessário por nível
+
+12 níveis de VIP no total. O jogo não mostra "% do nível" diretamente — mostra o XP acumulado dentro do nível atual (reseta ao subir de nível). Tabela de XP necessário para ir do nível anterior para cada nível:
+
+| Nível VIP | XP necessário (do nível anterior) |
+|---|---|
+| 1 | — (nível inicial) |
+| 2 | 2.500 |
+| 3 | 5.000 |
+| 4 | 12.500 |
+| 5 | 30.000 |
+| 6 | 40.000 |
+| 7 | 70.000 |
+| 8 | 100.000 |
+| 9 | 350.000 |
+| 10 | 600.000 |
+| 11 | 1.200.000 |
+| 12 | 2.400.000 |
+
+Soma total para chegar ao VIP 12 do zero: 4.810.000 XP (confere com fontes que citam esse total). Taxa fixa de conversão: 2 gemas = 1 XP de VIP (não muda com eventos ou nível).
+
+O app (sexta rodada, 2026-07-03) pede só o XP dentro do nível atual (`vipXp`, o número que aparece na tela do jogo) e calcula `derived.vipProgressPct` sozinho usando esta tabela (`VIP_XP_REQUIRED_FOR_LEVEL` em `strategyEngine.ts`). Antes disso o campo era uma % que o jogador tinha que estimar visualmente — informação que o jogo não expõe de forma direta.
+
+Fonte: [Whiteout Survival Data — VIP](https://whiteoutdata.com/guides/vip/) (tabela completa consultada em 2026-07-03).
 
 ## Cadência de eventos (usada pelo Timeline Engine)
 

@@ -4,6 +4,7 @@ import type {
   Profile,
   StrategyCard,
   StrategyCondition,
+  TroopEntry,
   WeeklySnapshot,
 } from '../types'
 import { computeEventTimeline, type EventTimelineEntry } from './eventTimeline'
@@ -23,6 +24,7 @@ export interface EvalContext {
   }
   derived: {
     reserveThreshold: number
+    vipProgressPct: number
     powerDelta: number | null
     gemsDelta: number | null
     maxHeroLevel: number
@@ -43,6 +45,33 @@ const RESERVE_THRESHOLD_BY_PROFILE: Record<Profile['financialProfile'], number> 
   medium_spender: 25000,
   high_spender: 15000,
   whale: 10000,
+}
+
+// XP de VIP necessário para subir de cada nível para o seguinte (índice =
+// nível de destino). O jogo não expõe "% do nível" diretamente — só o XP
+// acumulado dentro do nível atual, que reseta ao subir. O usuário informa
+// esse XP bruto (vipXp) e o motor calcula a % sozinho. 12 é o nível máximo.
+// Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção VIP, whiteoutdata.com).
+const VIP_XP_REQUIRED_FOR_LEVEL: Record<number, number> = {
+  2: 2500,
+  3: 5000,
+  4: 12500,
+  5: 30000,
+  6: 40000,
+  7: 70000,
+  8: 100000,
+  9: 350000,
+  10: 600000,
+  11: 1200000,
+  12: 2400000,
+}
+const VIP_MAX_LEVEL = 12
+
+function computeVipProgressPct(vipLevel: number, vipXp: number): number {
+  if (vipLevel >= VIP_MAX_LEVEL) return 100
+  const requiredForNext = VIP_XP_REQUIRED_FOR_LEVEL[vipLevel + 1]
+  if (!requiredForNext) return 0
+  return Math.min(100, Math.max(0, (vipXp / requiredForNext) * 100))
 }
 
 // Nível máximo de herói liberado por nível de Fornalha (cresce em marcos, não
@@ -119,6 +148,18 @@ function computeHeroGenerationInfo(stateAgeDays: number | null): {
 // granularidade por tier individual. Ver docs/BACKLOG-v1.md item C e
 // docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas) para a origem das
 // proporções de referência usadas nas Strategy Cards.
+// Soma as linhas de troopEntries (uma por tier possuído, ex.: "Infantaria
+// Heróica nível VI: 7.848") por tipo — é assim que o jogo mostra o dado
+// (por tier dentro de cada tipo, nunca um total agregado direto). Ver
+// docs/BACKLOG-v1.md (sexta rodada) e KNOWLEDGE-001 (seção Tropas).
+function sumTroopsByType(entries: TroopEntry[]): { infantry: number; lancer: number; marksman: number } {
+  const totals = { infantry: 0, lancer: 0, marksman: 0 }
+  for (const entry of entries) {
+    totals[entry.type] += entry.quantity
+  }
+  return totals
+}
+
 function computeTroopComposition(
   infantry: number,
   lancer: number,
@@ -148,9 +189,11 @@ export function buildContext(
 ): EvalContext {
   const stateAgeDays = computeStateAgeDays(profile.stateFoundedDate, new Date())
   const heroGenerationInfo = computeHeroGenerationInfo(stateAgeDays)
-  const totalTroops = snapshot.troopsInfantry + snapshot.troopsLancer + snapshot.troopsMarksman
-  const previousTotalTroops = previousSnapshot
-    ? previousSnapshot.troopsInfantry + previousSnapshot.troopsLancer + previousSnapshot.troopsMarksman
+  const troopsByType = sumTroopsByType(snapshot.troopEntries ?? [])
+  const totalTroops = troopsByType.infantry + troopsByType.lancer + troopsByType.marksman
+  const previousTroopsByType = previousSnapshot ? sumTroopsByType(previousSnapshot.troopEntries ?? []) : null
+  const previousTotalTroops = previousTroopsByType
+    ? previousTroopsByType.infantry + previousTroopsByType.lancer + previousTroopsByType.marksman
     : null
 
   return {
@@ -163,6 +206,7 @@ export function buildContext(
     },
     derived: {
       reserveThreshold: RESERVE_THRESHOLD_BY_PROFILE[profile.financialProfile],
+      vipProgressPct: computeVipProgressPct(snapshot.vipLevel, snapshot.vipXp),
       powerDelta: previousSnapshot ? snapshot.power - previousSnapshot.power : null,
       gemsDelta: previousSnapshot ? snapshot.gems - previousSnapshot.gems : null,
       maxHeroLevel: computeMaxHeroLevel(snapshot.furnaceLevel),
@@ -171,9 +215,9 @@ export function buildContext(
       ...heroGenerationInfo,
       totalTroops,
       troopCompositionPct: computeTroopComposition(
-        snapshot.troopsInfantry,
-        snapshot.troopsLancer,
-        snapshot.troopsMarksman
+        troopsByType.infantry,
+        troopsByType.lancer,
+        troopsByType.marksman
       ),
       troopsDelta: previousTotalTroops !== null ? totalTroops - previousTotalTroops : null,
     },

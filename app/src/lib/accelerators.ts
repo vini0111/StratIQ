@@ -15,3 +15,14 @@ export function toDecimalDays(amount: number, unit: AcceleratorUnit): number {
   if (unit === 'minutes') return amount / 1440
   return amount
 }
+
+// Inverso de toDecimalDays — usado para re-exibir um valor (guardado
+// internamente sempre em dias) na unidade que o usuário escolher no
+// seletor. Sem isso, trocar a unidade só reinterpreta o mesmo número em vez
+// de convertê-lo (bug relatado: valores em dias com casas decimais não
+// viravam horas ao mudar o seletor).
+export function fromDecimalDays(days: number, unit: AcceleratorUnit): number {
+  if (unit === 'hours') return days * 24
+  if (unit === 'minutes') return days * 1440
+  return days
+}

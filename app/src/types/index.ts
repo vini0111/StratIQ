@@ -36,13 +36,21 @@ export interface HeroEntry {
   stars: number
 }
 
+export type TroopType = 'infantry' | 'lancer' | 'marksman'
+
+export interface TroopEntry {
+  type: TroopType
+  tier: string
+  quantity: number
+}
+
 export interface WeeklySnapshot {
   id?: string
   profileId: string
   snapshotDate: string
   furnaceLevel: number
   vipLevel: number
-  vipProgressPct: number
+  vipXp: number
   gems: number
   accelGeneralDays: number
   accelTrainingDays: number
@@ -55,9 +63,7 @@ export interface WeeklySnapshot {
   currentResearch: string
   currentBuilding: string
   currentBuilding2?: string
-  troopsInfantry: number
-  troopsLancer: number
-  troopsMarksman: number
+  troopEntries: TroopEntry[]
   highestTierTraining?: string
   weeklyQuestion?: string
   createdAt?: string

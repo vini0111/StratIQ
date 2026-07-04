@@ -9,7 +9,7 @@ const PRIORITY_LABEL: Record<StrategyCard['priority'], string> = {
 
 export default function RecommendationList({ recommendations }: { recommendations: StrategyCard[] }) {
   if (recommendations.length === 0) {
-    return <p className="muted">Nenhuma recomendação para esta semana. Continue assim.</p>
+    return <p className="muted">Nenhuma recomendação por enquanto. Continue assim.</p>
   }
 
   return (

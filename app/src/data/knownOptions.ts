@@ -54,11 +54,32 @@ export const KNOWN_BUILDINGS = [
   'Hall dos Heróis',
 ]
 
-// Tier mais alto de tropa em treino/promoção no momento. T11 exige War
-// Academy; T12 ("Exalted") exige War Academy + Fire Crystal FC10. Ver
-// docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas / Battle Domain).
+// Tiers de tropa (I-XII). Cada tier tem um nome próprio no jogo, não é só
+// um número — ex.: o jogador confirmou "V Resistente" e "VI Heróica" no
+// cliente em PT. Os demais nomes abaixo são o termo em inglês (fonte:
+// whiteoutdata.com/wostools.net), ainda não confirmados contra o cliente em
+// PT — ajustar se divergirem do texto real. XI (Helios) e XII (Exalted) só
+// existem via pesquisa na Academia de Guerra. Ver KNOWLEDGE-001 (seção
+// Tropas / Battle Domain).
 export const KNOWN_TROOP_TIERS = [
-  'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12',
+  'I - Rookie',
+  'II - Trained',
+  'III - Senior',
+  'IV - Veteran',
+  'V - Resistente',
+  'VI - Heróica',
+  'VII - Brave',
+  'VIII - Elite',
+  'IX - Supreme',
+  'X - Apex',
+  'XI - Helios',
+  'XII - Exalted',
+]
+
+export const KNOWN_TROOP_TYPES: { value: 'infantry' | 'lancer' | 'marksman'; label: string }[] = [
+  { value: 'infantry', label: 'Infantaria' },
+  { value: 'lancer', label: 'Lanceiro' },
+  { value: 'marksman', label: 'Atirador' },
 ]
 
 export const KNOWN_RESEARCH = [

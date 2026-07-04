@@ -7,7 +7,7 @@
     { "field": "profile.objective", "op": "eq", "value": "bear_trap" },
     { "field": "currentEvents", "op": "contains", "value": "Urso" }
   ],
-  "recommendation": "Armadilha do Urso (Bear Trap) é seu objetivo principal e está ativo agora. Direcione recursos e aceleradores para esta semana.",
+  "recommendation": "Armadilha do Urso (Bear Trap) é seu objetivo principal e está ativo agora. Direcione recursos e aceleradores para ele.",
   "explanation": "Alinhar o objetivo declarado do jogador com o evento ativo evita dispersão de recursos em eventos secundários.",
   "impact": "high",
   "confidence": 0.8

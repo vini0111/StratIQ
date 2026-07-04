@@ -1,24 +1,26 @@
-import { useState } from 'react'
-import type { HeroEntry, Profile, WeeklySnapshot } from '../types'
+import { useEffect, useState } from 'react'
+import type { HeroEntry, Profile, TroopEntry, WeeklySnapshot } from '../types'
 import {
   KNOWN_BUILDINGS,
   KNOWN_EVENTS,
   KNOWN_HEROES,
   KNOWN_RESEARCH,
   KNOWN_TROOP_TIERS,
+  KNOWN_TROOP_TYPES,
 } from '../data/knownOptions'
-import { ACCELERATOR_UNIT_LABELS, AcceleratorUnit, toDecimalDays } from '../lib/accelerators'
+import { ACCELERATOR_UNIT_LABELS, AcceleratorUnit, fromDecimalDays, toDecimalDays } from '../lib/accelerators'
 import AcceleratorInput from './AcceleratorInput'
 
 type DraftSnapshot = Omit<WeeklySnapshot, 'id' | 'profileId' | 'createdAt'>
 
 const emptyHero: HeroEntry = { name: '', level: 1, stars: 1 }
+const emptyTroopEntry: TroopEntry = { type: 'infantry', tier: '', quantity: 0 }
 
 const blankDraft: DraftSnapshot = {
   snapshotDate: new Date().toISOString().slice(0, 10),
   furnaceLevel: 1,
   vipLevel: 0,
-  vipProgressPct: 0,
+  vipXp: 0,
   gems: 0,
   accelGeneralDays: 0,
   accelTrainingDays: 0,
@@ -31,9 +33,7 @@ const blankDraft: DraftSnapshot = {
   currentResearch: '',
   currentBuilding: '',
   currentBuilding2: '',
-  troopsInfantry: 0,
-  troopsLancer: 0,
-  troopsMarksman: 0,
+  troopEntries: [],
   highestTierTraining: '',
   weeklyQuestion: '',
 }
@@ -61,6 +61,50 @@ function buildInitialAcceleratorAmounts(last: WeeklySnapshot | null): typeof emp
   }
 }
 
+// Autosave em localStorage — defesa extra contra perda de dados em cima do
+// próprio bug corrigido em App.tsx (recarregamento indevido a cada refresh
+// de token). Mesmo com aquele bug resolvido, o navegador/SO pode descartar
+// a aba por memória (comum em celular) e recarregar do zero ao voltar —
+// isso o código não controla. Guardado por perfil, limpo após salvar com
+// sucesso.
+interface PersistedDraft {
+  draft: DraftSnapshot
+  selectedEvents: string[]
+  customEventsText: string
+  acceleratorUnit: AcceleratorUnit
+  acceleratorAmounts: typeof emptyAcceleratorAmounts
+}
+
+function draftStorageKey(profileId: string) {
+  return `stratiq-draft-${profileId}`
+}
+
+function loadPersistedDraft(profileId: string): PersistedDraft | null {
+  try {
+    const raw = localStorage.getItem(draftStorageKey(profileId))
+    return raw ? (JSON.parse(raw) as PersistedDraft) : null
+  } catch {
+    return null
+  }
+}
+
+function persistDraft(profileId: string, data: PersistedDraft) {
+  try {
+    localStorage.setItem(draftStorageKey(profileId), JSON.stringify(data))
+  } catch {
+    // localStorage indisponível (modo privado, cota cheia etc.) — autosave é
+    // só uma rede de segurança extra, não crítico se falhar silenciosamente.
+  }
+}
+
+function clearPersistedDraft(profileId: string) {
+  try {
+    localStorage.removeItem(draftStorageKey(profileId))
+  } catch {
+    // ver comentário em persistDraft
+  }
+}
+
 // Pré-preenche com os dados persistentes do último check-in (fornalha, VIP,
 // gemas, poder, filas, heróis, tropas) — o jogador só edita o que realmente
 // mudou. Evento NÃO carrega do anterior: é "o que está rolando esta
@@ -73,16 +117,14 @@ function buildInitialDraft(last: WeeklySnapshot | null): DraftSnapshot {
     ...blankDraft,
     furnaceLevel: last.furnaceLevel,
     vipLevel: last.vipLevel,
-    vipProgressPct: last.vipProgressPct,
+    vipXp: last.vipXp,
     gems: last.gems,
     power: last.power,
     heroes: last.heroes.length > 0 ? last.heroes.map((h) => ({ ...h })) : [{ ...emptyHero }],
     currentResearch: last.currentResearch,
     currentBuilding: last.currentBuilding,
     currentBuilding2: last.currentBuilding2 ?? '',
-    troopsInfantry: last.troopsInfantry,
-    troopsLancer: last.troopsLancer,
-    troopsMarksman: last.troopsMarksman,
+    troopEntries: last.troopEntries.map((t) => ({ ...t })),
     highestTierTraining: last.highestTierTraining ?? '',
   }
 }
@@ -98,13 +140,19 @@ export default function SnapshotForm({
   onSubmit: (draft: DraftSnapshot) => void
   submitting: boolean
 }) {
-  const [draft, setDraft] = useState<DraftSnapshot>(() => buildInitialDraft(lastSnapshot))
-  const [selectedEvents, setSelectedEvents] = useState<string[]>([])
-  const [customEventsText, setCustomEventsText] = useState('')
-  const [acceleratorUnit, setAcceleratorUnit] = useState<AcceleratorUnit>('days')
-  const [acceleratorAmounts, setAcceleratorAmounts] = useState(() =>
-    buildInitialAcceleratorAmounts(lastSnapshot)
+  const persisted = loadPersistedDraft(profile.id)
+  const [draft, setDraft] = useState<DraftSnapshot>(() => persisted?.draft ?? buildInitialDraft(lastSnapshot))
+  const [selectedEvents, setSelectedEvents] = useState<string[]>(() => persisted?.selectedEvents ?? [])
+  const [customEventsText, setCustomEventsText] = useState(() => persisted?.customEventsText ?? '')
+  const [acceleratorUnit, setAcceleratorUnit] = useState<AcceleratorUnit>(() => persisted?.acceleratorUnit ?? 'days')
+  const [acceleratorAmounts, setAcceleratorAmounts] = useState(
+    () => persisted?.acceleratorAmounts ?? buildInitialAcceleratorAmounts(lastSnapshot)
   )
+
+  // Salva o rascunho a cada mudança — ver comentário em PersistedDraft acima.
+  useEffect(() => {
+    persistDraft(profile.id, { draft, selectedEvents, customEventsText, acceleratorUnit, acceleratorAmounts })
+  }, [draft, selectedEvents, customEventsText, acceleratorUnit, acceleratorAmounts, profile.id])
 
   function update<K extends keyof DraftSnapshot>(key: K, value: DraftSnapshot[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }))
@@ -112,6 +160,21 @@ export default function SnapshotForm({
 
   function updateAccelerator(key: keyof typeof emptyAcceleratorAmounts, amount: number) {
     setAcceleratorAmounts((prev) => ({ ...prev, [key]: amount }))
+  }
+
+  // Trocar a unidade deve recalcular os números já digitados, não só
+  // reinterpretar o mesmo valor sob um rótulo diferente (bug relatado:
+  // valor em dias com casas decimais não convertia ao trocar para horas).
+  function changeAcceleratorUnit(newUnit: AcceleratorUnit) {
+    setAcceleratorAmounts((prev) => {
+      const next = { ...prev }
+      for (const key of Object.keys(prev) as (keyof typeof emptyAcceleratorAmounts)[]) {
+        const days = toDecimalDays(prev[key], acceleratorUnit)
+        next[key] = Math.round(fromDecimalDays(days, newUnit) * 100) / 100
+      }
+      return next
+    })
+    setAcceleratorUnit(newUnit)
   }
 
   function toggleEvent(name: string) {
@@ -136,6 +199,21 @@ export default function SnapshotForm({
     setDraft((prev) => ({ ...prev, heroes: prev.heroes.filter((_, i) => i !== index) }))
   }
 
+  function updateTroopEntry(index: number, patch: Partial<TroopEntry>) {
+    setDraft((prev) => ({
+      ...prev,
+      troopEntries: prev.troopEntries.map((t, i) => (i === index ? { ...t, ...patch } : t)),
+    }))
+  }
+
+  function addTroopEntry() {
+    setDraft((prev) => ({ ...prev, troopEntries: [...prev.troopEntries, { ...emptyTroopEntry }] }))
+  }
+
+  function removeTroopEntry(index: number) {
+    setDraft((prev) => ({ ...prev, troopEntries: prev.troopEntries.filter((_, i) => i !== index) }))
+  }
+
   return (
     <form
       className="card"
@@ -154,10 +232,12 @@ export default function SnapshotForm({
           accelHealingDays: toDecimalDays(acceleratorAmounts.healing, acceleratorUnit),
           currentEvents: [...selectedEvents, ...customEvents],
           heroes: draft.heroes.filter((h) => h.name.trim().length > 0),
+          troopEntries: draft.troopEntries.filter((t) => t.tier.trim().length > 0),
         })
+        clearPersistedDraft(profile.id)
       }}
     >
-      <h3>Atualização semanal</h3>
+      <h3>Novo check-in</h3>
       <p className="muted">
         {lastSnapshot
           ? 'Já preenchemos com os dados do seu último check-in — só ajuste o que mudou.'
@@ -216,13 +296,12 @@ export default function SnapshotForm({
 
       <div className="grid-2">
         <div>
-          <label>Progresso VIP (%)</label>
+          <label>XP de VIP (progresso no nível atual)</label>
           <input
             type="number"
             min={0}
-            max={100}
-            value={draft.vipProgressPct}
-            onChange={(e) => update('vipProgressPct', Number(e.target.value))}
+            value={draft.vipXp}
+            onChange={(e) => update('vipXp', Number(e.target.value) || 0)}
           />
         </div>
         <div>
@@ -234,6 +313,10 @@ export default function SnapshotForm({
           />
         </div>
       </div>
+      <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
+        O número que aparece na tela de VIP do jogo, tipo "X / Y para o próximo nível" — informe só
+        o X. O app calcula a % sozinho a partir da tabela de XP necessário por nível.
+      </p>
 
       <label>Poder</label>
       <input
@@ -242,60 +325,66 @@ export default function SnapshotForm({
         onChange={(e) => update('power', Number(e.target.value))}
       />
 
-      <label>Tropas (total por tipo)</label>
-      <div className="grid-2">
-        <div>
-          <label className="muted">Infantaria</label>
-          <input
-            type="number"
-            min={0}
-            value={draft.troopsInfantry}
-            onChange={(e) => update('troopsInfantry', Number(e.target.value) || 0)}
-          />
-        </div>
-        <div>
-          <label className="muted">Lanceiros</label>
-          <input
-            type="number"
-            min={0}
-            value={draft.troopsLancer}
-            onChange={(e) => update('troopsLancer', Number(e.target.value) || 0)}
-          />
-        </div>
-      </div>
-      <div className="grid-2">
-        <div>
-          <label className="muted">Atiradores (Marksman)</label>
-          <input
-            type="number"
-            min={0}
-            value={draft.troopsMarksman}
-            onChange={(e) => update('troopsMarksman', Number(e.target.value) || 0)}
-          />
-        </div>
-        <div>
-          <label className="muted">Tier mais alto em treino</label>
+      <label>Tropas (uma linha por tipo + tier que você tiver)</label>
+      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+        O jogo mostra por tier dentro de cada tipo (ex.: "Infantaria Heróica nível VI: 7.848"), não
+        um total único. Adicione uma linha para cada combinação que aparecer na sua tela.
+      </p>
+      {draft.troopEntries.map((entry, i) => (
+        <div className="hero-row" key={i}>
+          <select
+            value={entry.type}
+            onChange={(e) => updateTroopEntry(i, { type: e.target.value as TroopEntry['type'] })}
+          >
+            {KNOWN_TROOP_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
           <input
             type="text"
             list="troop-tiers-list"
-            placeholder="ex.: T8"
-            value={draft.highestTierTraining ?? ''}
-            onChange={(e) => update('highestTierTraining', e.target.value)}
+            placeholder="Tier (ex.: VI - Heróica)"
+            value={entry.tier}
+            onChange={(e) => updateTroopEntry(i, { tier: e.target.value })}
           />
+          <input
+            type="number"
+            min={0}
+            placeholder="Quantidade"
+            value={entry.quantity}
+            onChange={(e) => updateTroopEntry(i, { quantity: Number(e.target.value) || 0 })}
+          />
+          <button type="button" className="secondary" onClick={() => removeTroopEntry(i)}>
+            Remover
+          </button>
         </div>
-      </div>
+      ))}
+      <button type="button" className="secondary" onClick={addTroopEntry} style={{ marginBottom: 12 }}>
+        + linha de tropa
+      </button>
       <datalist id="troop-tiers-list">
         {KNOWN_TROOP_TIERS.map((t) => (
           <option key={t} value={t} />
         ))}
       </datalist>
 
+      <label>Tier mais alto em treino agora</label>
+      <input
+        type="text"
+        list="troop-tiers-list"
+        placeholder="ex.: VII - Brave"
+        value={draft.highestTierTraining ?? ''}
+        onChange={(e) => update('highestTierTraining', e.target.value)}
+      />
+
       <label>Aceleradores disponíveis agora</label>
       <div style={{ marginBottom: 8 }}>
         <label className="muted">Unidade (vale para todos abaixo)</label>
         <select
           value={acceleratorUnit}
-          onChange={(e) => setAcceleratorUnit(e.target.value as AcceleratorUnit)}
+          onChange={(e) => changeAcceleratorUnit(e.target.value as AcceleratorUnit)}
         >
           {(Object.keys(ACCELERATOR_UNIT_LABELS) as AcceleratorUnit[]).map((u) => (
             <option key={u} value={u}>
@@ -424,7 +513,7 @@ export default function SnapshotForm({
         </button>
       )}
 
-      <label>Dúvida da semana (opcional)</label>
+      <label>Dúvida do dia (opcional)</label>
       <textarea
         rows={2}
         value={draft.weeklyQuestion}

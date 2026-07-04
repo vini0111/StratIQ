@@ -44,7 +44,7 @@ export default function HistorySparkline({
 
   const values = snapshots.map((s) =>
     field === 'totalTroops'
-      ? s.troopsInfantry + s.troopsLancer + s.troopsMarksman
+      ? s.troopEntries.reduce((sum, t) => sum + t.quantity, 0)
       : (s[field] as number)
   )
   const n = values.length

@@ -28,13 +28,22 @@ export default function App() {
     return () => listener.subscription.unsubscribe()
   }, [])
 
+  // Depende só do ID do usuário, não do objeto `session` inteiro. O
+  // Supabase emite um novo objeto de sessão (mesma pessoa) sempre que o
+  // token é renovado — o que acontece automaticamente, inclusive toda vez
+  // que a aba volta a ficar em foco. Se este efeito dependesse de `session`,
+  // cada uma dessas renovações reexecutaria loadProfile → setLoadingProfile
+  // (true) → a tela renderiza null momentaneamente → Dashboard/SnapshotForm
+  // são desmontados e o rascunho em preenchimento é perdido. Foi a causa
+  // raiz do "a página se atualiza sozinha e perco o que eu tava digitando".
+  const userId = session?.user.id
   useEffect(() => {
-    if (!session) {
+    if (!userId) {
       setProfile(null)
       return
     }
-    loadProfile(session.user.id)
-  }, [session])
+    loadProfile(userId)
+  }, [userId])
 
   async function loadProfile(userId: string) {
     setLoadingProfile(true)

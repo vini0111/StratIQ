@@ -3,8 +3,8 @@
   "name": "Priorizar pontos de VIP",
   "domain": "growth",
   "priority": "high",
-  "conditions": [{ "field": "vipProgressPct", "op": "gte", "value": 80 }],
-  "recommendation": "Você está perto de subir de nível de VIP. Priorize recursos que geram pontos de VIP esta semana.",
+  "conditions": [{ "field": "derived.vipProgressPct", "op": "gte", "value": 80 }],
+  "recommendation": "Você está perto de subir de nível de VIP. Priorize recursos que geram pontos de VIP agora.",
   "explanation": "Completar um nível de VIP quase concluído desbloqueia bônus permanentes com melhor custo-benefício do que começar um novo nível do zero.",
   "impact": "medium",
   "confidence": 0.75

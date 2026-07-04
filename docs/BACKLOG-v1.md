@@ -89,3 +89,13 @@ Motor ganhou `derived.totalTroops`, `derived.troopCompositionPct` (percentual po
 Novo campo opcional `stateFoundedDate` no perfil (perguntado uma vez, não toda semana). O motor calcula `derived.stateAgeDays` e mapeia para geração via `HERO_GENERATION_MILESTONES` (faixas aproximadas de guias da comunidade, não confirmadas oficialmente — ver KNOWLEDGE-001). Nova card `NEXT_HERO_GENERATION_ETA` mostra "Geração X chega em ~Y dias" via template. Se o jogador não preencher a data, a card simplesmente não dispara (sem degradar para aviso genérico).
 
 **Infraestrutura compartilhada:** B e D usaram a mesma peça de base — suporte a texto calculado (`{{caminho.para.valor}}`) em `recommendation`/`explanation`, implementado uma vez em `strategyEngine.ts` (`interpolate()`) e reaproveitado pelos dois. C (avaliação de tropas) continua independente e é o próximo item a abrir como rodada própria.
+
+## Adendo 2026-07-03 — quinta rodada de feedback
+
+Feedback de uso real antes do teste da idade do estado e das tropas (recém-implementadas). Cinco pedidos:
+
+- **Pré-preenchimento incompleto no formulário (aceleradores zerados)** — ✅ corrigido. Aceleradores agora carregam do último check-in (`buildInitialAcceleratorAmounts` em `SnapshotForm.tsx`), porque é estoque acumulado, não algo que reseta toda semana — decisão de design anterior (não carregar) foi revertida a pedido do usuário. Heróis já carregavam corretamente do check-in anterior (não era um bug de código; se apareceram zerados, o check-in anterior real provavelmente estava mesmo sem heróis preenchidos).
+- **Lista de construções incompleta** — ✅ completada: Cabana do Explorador, Cabana do Caçador, Serraria, Mina de Ferro, Mina de Carvão, Casa de Cozinha, Abrigo, Hall dos Heróis (fonte: whiteoutsurvival.wiki, nomes PT traduzidos do inglês, não confirmados 1:1 contra o cliente do jogo).
+- **Gráficos de evolução pouco atraentes** — ✅ redesenhados: `HistorySparkline.tsx` trocou as barras por um gráfico de área com curva suave (SVG, sem biblioteca externa), gradiente na cor de destaque, e tooltip ao passar o mouse mostrando data + valor exato.
+- **Sem opção de excluir check-in equivocado** — ✅ adicionado botão "Excluir" por linha no Histórico (`HistoryTable.tsx`), com confirmação, chamando delete no Supabase (política RLS `snapshots_delete_own` já existia desde o schema inicial).
+- **Visibilidade da idade do estado** — ✅ exposta no cabeçalho do Dashboard ("dia X do estado"), calculada a partir de `stateFoundedDate` independentemente de haver check-ins (antes só existia internamente como `derived.stateAgeDays` para as Strategy Cards de geração de herói).

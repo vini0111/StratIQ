@@ -145,20 +145,6 @@ button:disabled {
 
 .muted { color: var(--muted); font-size: 13px; }
 
-.sparkline {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 48px;
-}
-
-.sparkline .bar {
-  flex: 1;
-  background: var(--accent);
-  border-radius: 2px 2px 0 0;
-  min-height: 2px;
-}
-
 .brand {
   display: flex;
   align-items: center;

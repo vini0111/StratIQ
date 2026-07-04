@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Profile, WeeklySnapshot } from '../types'
 import { supabase } from '../lib/supabaseClient'
 import { snapshotFromRow, snapshotToRow } from '../lib/mappers'
-import { buildContext, evaluateStrategyCards } from '../lib/strategyEngine'
+import { buildContext, computeStateAgeDays, evaluateStrategyCards } from '../lib/strategyEngine'
 import { computeSemaphore } from '../lib/semaphore'
 import { strategyCards } from '../data/strategyCards'
 import SnapshotForm from '../components/SnapshotForm'
@@ -50,6 +50,17 @@ export default function Dashboard({
     setLoading(false)
   }
 
+  async function handleDeleteSnapshot(id: string) {
+    setError(null)
+    const { error } = await supabase.from('weekly_snapshots').delete().eq('id', id)
+    if (error) {
+      console.error('Falha ao excluir snapshot:', error)
+      setError(`Não foi possível excluir: ${error.message}`)
+      return
+    }
+    await loadSnapshots()
+  }
+
   async function handleNewSnapshot(draft: Omit<WeeklySnapshot, 'id' | 'profileId' | 'createdAt'>) {
     setSubmitting(true)
     setError(null)
@@ -80,11 +91,17 @@ export default function Dashboard({
     }
   }, [latest, previous, profile, snapshots])
 
+  // Idade do estado independe de haver check-ins — só depende da data
+  // informada no perfil. Calculada à parte para aparecer mesmo antes do
+  // primeiro check-in. Ver docs/BACKLOG-v1.md (quinta rodada de feedback).
+  const stateAgeDays = computeStateAgeDays(profile.stateFoundedDate, new Date())
+
   return (
     <div>
       <Brand size={24} />
       <p className="muted" style={{ marginTop: 6, marginBottom: 20 }}>
-        Estado {profile.stateNumber} · {profile.alliance || 'sem aliança'} ·{' '}
+        Estado {profile.stateNumber} · {profile.alliance || 'sem aliança'}
+        {stateAgeDays !== null && ` · dia ${stateAgeDays} do estado`} ·{' '}
         <button
           type="button"
           onClick={onEditProfile}
@@ -140,7 +157,7 @@ export default function Dashboard({
       {snapshots.length > 0 && (
         <div className="card">
           <h3>Histórico</h3>
-          <HistoryTable snapshots={snapshots} />
+          <HistoryTable snapshots={snapshots} onDelete={handleDeleteSnapshot} />
         </div>
       )}
 

@@ -133,7 +133,7 @@ function computeTroopComposition(
   }
 }
 
-function computeStateAgeDays(stateFoundedDate: string | undefined, today: Date): number | null {
+export function computeStateAgeDays(stateFoundedDate: string | undefined, today: Date): number | null {
   if (!stateFoundedDate) return null
   const founded = new Date(stateFoundedDate)
   if (Number.isNaN(founded.getTime())) return null

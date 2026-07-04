@@ -13,6 +13,12 @@
 // real do jogo (sem uso observado do jogador) — ajustar se o nome oficial
 // for diferente. Multi-idioma (PT/EN/ES) fica registrado como item futuro —
 // ver BACKLOG-v1.
+//
+// KNOWN_BUILDINGS inclui as construções de produção de recursos (Serraria,
+// Mina de Ferro, Mina de Carvão, Cabana do Caçador) e early-game (Cabana do
+// Explorador, Abrigo), completadas em 2026-07-03 a partir de
+// whiteoutsurvival.wiki — nomes em PT não confirmados 1:1 contra o cliente
+// do jogo (traduzidos do inglês), ajustar se divergirem do texto real.
 
 export const KNOWN_EVENTS = [
   'Roda da Sorte',
@@ -38,6 +44,14 @@ export const KNOWN_BUILDINGS = [
   'Acampamento de Atiradores',
   'Depósito',
   'Muralha',
+  'Abrigo',
+  'Cabana do Explorador',
+  'Cabana do Caçador',
+  'Serraria',
+  'Mina de Ferro',
+  'Mina de Carvão',
+  'Casa de Cozinha',
+  'Hall dos Heróis',
 ]
 
 // Tier mais alto de tropa em treino/promoção no momento. T11 exige War

@@ -46,10 +46,27 @@ const emptyAcceleratorAmounts = {
   healing: 0,
 }
 
+// Pré-preenche aceleradores com o estoque do último check-in (unidade
+// "dias", que é o que fica salvo internamente) — o jogador ajusta a partir
+// daí em vez de partir de zero toda semana. Pedido explícito do usuário:
+// zerar esse campo obrigava a redigitar o estoque inteiro toda atualização.
+function buildInitialAcceleratorAmounts(last: WeeklySnapshot | null): typeof emptyAcceleratorAmounts {
+  if (!last) return emptyAcceleratorAmounts
+  return {
+    general: last.accelGeneralDays,
+    training: last.accelTrainingDays,
+    construction: last.accelConstructionDays,
+    research: last.accelResearchDays,
+    healing: last.accelHealingDays,
+  }
+}
+
 // Pré-preenche com os dados persistentes do último check-in (fornalha, VIP,
-// gemas, poder, filas, heróis) — o jogador só edita o que realmente mudou.
-// Aceleradores e evento NÃO carregam do anterior: são "estoque atual" e
-// "o que está rolando esta semana", não algo que persiste igual.
+// gemas, poder, filas, heróis, tropas) — o jogador só edita o que realmente
+// mudou. Evento NÃO carrega do anterior: é "o que está rolando esta
+// semana", não algo que persiste igual. Aceleradores carregam do anterior
+// (ver buildInitialAcceleratorAmounts) — é estoque acumulado, não um valor
+// que reseta toda semana.
 function buildInitialDraft(last: WeeklySnapshot | null): DraftSnapshot {
   if (!last) return blankDraft
   return {
@@ -85,7 +102,9 @@ export default function SnapshotForm({
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [customEventsText, setCustomEventsText] = useState('')
   const [acceleratorUnit, setAcceleratorUnit] = useState<AcceleratorUnit>('days')
-  const [acceleratorAmounts, setAcceleratorAmounts] = useState(emptyAcceleratorAmounts)
+  const [acceleratorAmounts, setAcceleratorAmounts] = useState(() =>
+    buildInitialAcceleratorAmounts(lastSnapshot)
+  )
 
   function update<K extends keyof DraftSnapshot>(key: K, value: DraftSnapshot[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }))

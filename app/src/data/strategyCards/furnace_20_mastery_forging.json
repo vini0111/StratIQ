@@ -1,0 +1,14 @@
+{
+  "id": "FURNACE_20_MASTERY_FORGING",
+  "name": "Mastery Forging disponível",
+  "domain": "growth",
+  "priority": "medium",
+  "conditions": [
+    { "field": "furnaceLevel", "op": "gte", "value": 20 },
+    { "field": "furnaceLevel", "op": "lt", "value": 22 }
+  ],
+  "recommendation": "A Fornalha 20 libera Mastery Forging. Vale revisar essa mecânica antes de acumular recursos sem direção.",
+  "explanation": "Marco de desbloqueio por nível de Fornalha. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).",
+  "impact": "medium",
+  "confidence": 0.65
+}

@@ -71,6 +71,7 @@ export type ConditionOperator =
   | 'contains'
   | 'anyHeroBelowStars'
   | 'heroNamedBelowStars'
+  | 'anyHeroAtOrAboveLevel'
 
 export interface StrategyCondition {
   field: string

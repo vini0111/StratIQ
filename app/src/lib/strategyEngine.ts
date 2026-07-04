@@ -24,6 +24,7 @@ export interface EvalContext {
     reserveThreshold: number
     powerDelta: number | null
     gemsDelta: number | null
+    maxHeroLevel: number
   }
 }
 
@@ -33,6 +34,38 @@ const RESERVE_THRESHOLD_BY_PROFILE: Record<Profile['financialProfile'], number> 
   medium_spender: 25000,
   high_spender: 15000,
   whale: 10000,
+}
+
+// Nível máximo de herói liberado por nível de Fornalha (cresce em marcos, não
+// a cada nível). Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).
+// Lista ordenada; usamos o maior marco <= ao nível atual da fornalha.
+const MAX_HERO_LEVEL_MILESTONES: [furnaceLevel: number, maxHeroLevel: number][] = [
+  [4, 20],
+  [10, 22],
+  [11, 25],
+  [12, 28],
+  [13, 31],
+  [14, 34],
+  [15, 37],
+  [16, 40],
+  [17, 43],
+  [18, 46],
+  [19, 49],
+  [20, 54],
+  [21, 59],
+  [22, 64],
+  [23, 69],
+  [24, 74],
+  [25, 79],
+  [26, 80],
+]
+
+function computeMaxHeroLevel(furnaceLevel: number): number {
+  let cap = 20 // linha de base antes do 1º marco (Fornalha 4)
+  for (const [level, maxLevel] of MAX_HERO_LEVEL_MILESTONES) {
+    if (furnaceLevel >= level) cap = maxLevel
+  }
+  return cap
 }
 
 export function buildContext(
@@ -52,6 +85,7 @@ export function buildContext(
       reserveThreshold: RESERVE_THRESHOLD_BY_PROFILE[profile.financialProfile],
       powerDelta: previousSnapshot ? snapshot.power - previousSnapshot.power : null,
       gemsDelta: previousSnapshot ? snapshot.gems - previousSnapshot.gems : null,
+      maxHeroLevel: computeMaxHeroLevel(snapshot.furnaceLevel),
     },
   }
 }
@@ -112,6 +146,12 @@ function evaluateOperator(op: ConditionOperator, left: unknown, right: unknown):
         Array.isArray(left) &&
         typeof right === 'number' &&
         (left as HeroEntry[]).some((h) => h.stars < right)
+      )
+    case 'anyHeroAtOrAboveLevel':
+      return (
+        Array.isArray(left) &&
+        typeof right === 'number' &&
+        (left as HeroEntry[]).some((h) => h.level >= right)
       )
     case 'heroNamedBelowStars': {
       // value no formato "Nome:estrelas", ex: "Flint:4".

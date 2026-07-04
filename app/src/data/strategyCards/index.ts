@@ -27,6 +27,12 @@ import f2pHeroPriorityFlint from './f2p_hero_priority_flint.json'
 import f2pHeroPriorityBlanchette from './f2p_hero_priority_blanchette.json'
 import f2pHeroPriorityEleonora from './f2p_hero_priority_eleonora.json'
 import zinmanUtilityPriority from './zinman_utility_priority.json'
+import furnace18PetsUnlocked from './furnace_18_pets_unlocked.json'
+import furnace20MasteryForging from './furnace_20_mastery_forging.json'
+import furnace22ChiefGear from './furnace_22_chief_gear.json'
+import furnace25ChiefGearCharms from './furnace_25_chief_gear_charms.json'
+import furnace30FireCrystal from './furnace_30_fire_crystal.json'
+import heroAtLevelCap from './hero_at_level_cap.json'
 
 export const strategyCards = [
   saveGemsBaselineReserve,
@@ -50,4 +56,10 @@ export const strategyCards = [
   f2pHeroPriorityBlanchette,
   f2pHeroPriorityEleonora,
   zinmanUtilityPriority,
+  furnace18PetsUnlocked,
+  furnace20MasteryForging,
+  furnace22ChiefGear,
+  furnace25ChiefGearCharms,
+  furnace30FireCrystal,
+  heroAtLevelCap,
 ] as unknown as StrategyCard[]

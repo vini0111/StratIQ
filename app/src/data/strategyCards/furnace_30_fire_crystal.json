@@ -1,0 +1,11 @@
+{
+  "id": "FURNACE_30_FIRE_CRYSTAL",
+  "name": "Fire Crystal Upgrades disponíveis",
+  "domain": "growth",
+  "priority": "high",
+  "conditions": [{ "field": "furnaceLevel", "op": "gte", "value": 30 }],
+  "recommendation": "Fornalha 30 alcançada — os upgrades de Fire Crystal (FC1+) já estão disponíveis e passam a ser a principal linha de progressão de longo prazo.",
+  "explanation": "Marco de desbloqueio por nível de Fornalha. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).",
+  "impact": "high",
+  "confidence": 0.6
+}

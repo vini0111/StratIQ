@@ -1,0 +1,14 @@
+{
+  "id": "FURNACE_25_CHIEF_GEAR_CHARMS",
+  "name": "Chief Gear Charms disponíveis",
+  "domain": "growth",
+  "priority": "medium",
+  "conditions": [
+    { "field": "furnaceLevel", "op": "gte", "value": 25 },
+    { "field": "furnaceLevel", "op": "lt", "value": 30 }
+  ],
+  "recommendation": "A Fornalha 25 libera Charms para o Chief Gear. Vale revisar prioridade de investimento entre equipamento e charms.",
+  "explanation": "Marco de desbloqueio por nível de Fornalha. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).",
+  "impact": "medium",
+  "confidence": 0.6
+}

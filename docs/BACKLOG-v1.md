@@ -26,10 +26,8 @@ A árvore de pesquisa completa continua fora de escopo (seria a Knowledge Base d
 ### 3. Aceleradores em dias/horas/minutos — ✅ Implementado em 2026-07-03
 Componente `AcceleratorInput` — três subcampos (dias/horas/minutos) convertidos para decimal internamente. Nenhuma mudança de schema.
 
-### 4. Nível do herói vs. cap do acampamento
-Pedido para sinalizar quando um herói está no limite de nível permitido pelo acampamento/fornalha atual, para não desperdiçar recursos nele.
-**Por que não agora:** exige saber a regra do jogo que liga cap de herói a nível de fornalha/acampamento — conhecimento de domínio que ainda não está modelado. Também é Knowledge Base.
-**Esforço estimado:** médio-alto (precisa da regra do jogo documentada antes de virar código).
+### 4. Nível do herói vs. cap do acampamento — ✅ Implementado em 2026-07-03
+Achamos uma fonte com a tabela completa de nível máximo de herói por nível de Fornalha (ex.: Fornalha 17 → 43, Fornalha 18 → 46). Adicionado `derived.maxHeroLevel` ao motor (calculado a partir da Fornalha), novo operador `anyHeroAtOrAboveLevel`, e card `HERO_AT_LEVEL_CAP` que avisa quando um herói favorito já está no limite. Fonte em KNOWLEDGE-001 (seção Fornalha).
 
 ### 5. Equipamentos, habilidades e frações de estrela (estágios de ascensão)
 Hoje heróis têm só nome/nível/estrelas (inteiro). O pedido é modelar equipamento, habilidades e o fato de que cada estrela tem 6 estágios de ascensão internos.
@@ -67,3 +65,30 @@ Pedido explícito: preparar (não construir agora) a possibilidade do jogador es
 **Por que não agora:** i18n completo (strings da UI + conteúdo de conhecimento traduzido em 3 idiomas) é expansão de escopo real — cada Strategy Card, label e opção de formulário precisaria de 3 versões, e as condições das cards (`contains`/`eq` em `currentEvents`) precisariam parar de depender do texto literal do idioma. É trabalho de arquitetura (separar chave interna de rótulo exibido), não só tradução.
 **Esforço estimado:** médio-alto (requer desacoplar valores internos usados pelo motor de regras dos rótulos exibidos ao usuário, hoje a mesma string faz os dois papéis).
 **Critério para revisitar:** útil desde já se o app ganhar qualquer usuário que jogue em EN ou ES — hoje seria só para o fundador, que joga em PT.
+
+## Adendo 2026-07-03 — quarta rodada (pedido de expansão maior)
+
+Depois da Fornalha subir de nível, quatro pedidos maiores. Avaliados individualmente:
+
+### A. Progressão de Fornalha (próximas melhorias) — ✅ Implementado
+Ver item 4 (reaproveitou a mesma fonte) + 5 novas cards de marco de Fornalha (18: Pets, 20: Mastery Forging, 22: Chief Gear, 25: Chief Gear Charms, 30: Fire Crystal). Isso resolveu o pedido concreto que motivou a pergunta.
+
+### B. Previsão de calendário de eventos (Timeline Engine)
+Pedido: saber os próximos eventos com antecedência para planejar coleta de gemas/recursos.
+**O que seria necessário:** KNOWLEDGE-001 já tem a frequência de cada evento (Lucky Wheel a cada 2 semanas, SvS ~mensal, Mobilização a cada 4 semanas) — falta um ponto de ancoragem (quando foi a última ocorrência) para calcular a próxima data. Isso poderia vir do próprio histórico de check-ins (primeira vez que detectarmos "Roda da Sorte" ativa vira a âncora), mas com poucos dias de uso ainda não temos histórico suficiente para isso ser confiável.
+**Esforço estimado:** médio — motor de datas (Timeline Engine) + mudança nas Strategy Cards para aceitar texto com valores calculados (hoje o texto é fixo; "faltam X dias" exige um pequeno sistema de template).
+**Por que não agora:** falta o ponto de ancoragem real (poucos dias de dado) e a funcionalidade de template no motor. Bom candidato para quando tivermos 3-4 semanas de histórico.
+
+### C. Avaliação de crescimento militar / nível de tropas (Battle Domain)
+Pedido: o app avaliar tropas, não só fornalha/VIP/gemas/poder.
+**O que seria necessário:** campo novo inteiro — hoje não coletamos composição de tropas (tier, quantidade por tipo: Infantaria/Lanceiro/Atirador). Precisaria de novos campos no formulário, no schema, e conhecimento sobre tiers de tropas (custo, poder por tropa) para gerar recomendação, não só exibir número.
+**Esforço estimado:** alto — é um domínio de dado novo inteiro (Battle Domain), não uma extensão de algo existente.
+**Por que não agora:** é o maior item desta lista. Vale abrir como rodada própria, não emendado em outros pedidos.
+
+### D. Previsão de chegada de novas gerações de heróis
+Pedido: prever quando novos heróis vão aparecer conforme o estado avança.
+**O que seria necessário:** já temos parte da pesquisa (gerações por idade do servidor: Gen1 1-40 dias, Gen2 40-120 dias, etc. — ver conversa de pesquisa de heróis). Falta só 1 campo novo: data de criação do estado (perguntado uma vez no perfil, não toda semana). Com isso dá para calcular idade do estado e estimar geração atual/próxima.
+**Esforço estimado:** baixo-médio — o campo é barato, mas mostrar "faltam X dias" no texto da recomendação esbarra na mesma limitação do item B (cards não suportam texto com valor calculado ainda).
+**Por que não agora:** mais barato que B e C, mas depende da mesma melhoria de base (templates nas cards) para ficar realmente útil (senão vira um aviso genérico "nova geração pode estar próxima", sem contagem de dias).
+
+**Recomendação de ordem, se formos continuar:** D e B compartilham a mesma peça de infraestrutura (suporte a texto calculado nas cards) — vale resolver isso uma vez e destravar os dois juntos. C é independente e maior — melhor tratar como rodada própria quando decidirmos investir num domínio de dado novo.

@@ -1,0 +1,14 @@
+{
+  "id": "FURNACE_18_PETS_UNLOCKED",
+  "name": "Beast Cage / Pets disponível",
+  "domain": "growth",
+  "priority": "high",
+  "conditions": [
+    { "field": "furnaceLevel", "op": "gte", "value": 18 },
+    { "field": "furnaceLevel", "op": "lt", "value": 20 }
+  ],
+  "recommendation": "A Fornalha 18 libera o Beast Cage (Pets). Se ainda não desbloqueou, vale iniciar — pets dão bônus permanentes.",
+  "explanation": "Marco de desbloqueio por nível de Fornalha. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).",
+  "impact": "medium",
+  "confidence": 0.7
+}

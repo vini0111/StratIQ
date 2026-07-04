@@ -39,6 +39,31 @@ Fonte: [Whiteout Survival Wiki — Canyon Clash](https://www.whiteoutsurvival.wi
 Um dos poucos eventos **solo** do jogo. Roda a cada 2 semanas, dura ~30 minutos numa zona de combate dedicada.
 Fonte: [BlueStacks — Recurring Events Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-recurring-events-guide-en.html)
 
+## Fornalha (Furnace)
+
+30 níveis. Cada nível libera prédios/mecânicas em marcos específicos (não a cada nível):
+
+| Fornalha | Desbloqueia |
+|---|---|
+| 4 | Hero Hall, Clínica, Cabana do Explorador |
+| 6 | Chief's House |
+| 7 | Infantry Camp, Barricada |
+| 8 | Embaixada, Arena, Marksman Camp, Enfermaria |
+| 9 | Depósito, Centro de Pesquisa, Lancer Camp |
+| 10 | Centro de Comando |
+| 11 | Enlistment Office |
+| 13 | Drill Camp |
+| 15 | Hero Gear |
+| **18** | **Beast Cage (Pets)** |
+| 20 | Mastery Forging |
+| 22 | Chief Gear |
+| 25 | Chief Gear Charms |
+| 30 | Fire Crystal Upgrades (FC1+) |
+
+Cada nível também eleva o **nível máximo permitido para heróis** (cap): Fornalha 17 → nível 43, Fornalha 18 → 46, Fornalha 19 → 49, Fornalha 20 → 54, Fornalha 22 → 64, Fornalha 26 → 80 (máximo do jogo). Nivelar um herói além do cap da fornalha atual não tem efeito — resolve o item 4 do BACKLOG-v1 ("nível do herói vs. cap do acampamento").
+
+Fonte: [Whiteout Survival Data — Furnace](https://whiteoutdata.com/buildings/furnace/) (tabela completa de requisitos e desbloqueios por nível, incluindo cap de herói).
+
 ## Pesquisa (Research Center)
 
 Três árvores: Growth (crescimento), Economy (economia), Battle (batalha). Ordem geralmente mais eficiente: **Growth → Battle → Economy**, com a ressalva de que só vale focar Economy quando a tecnologia de batalha já está no nível competitivo do estado. Dentro de Growth, "Tool Enhancement" (reduz tempo de pesquisa) é considerado um dos dois nós mais importantes do jogo inteiro — o efeito composto ao longo do tempo é grande, então vale maximizar cedo. Dentro de Battle, Infantry (saúde/defesa) protege as unidades de dano (Marksmen/Lancers) na retaguarda. Dentro de Economy, velocidade de coleta é a prioridade, porque a maior parte dos recursos vem de marchas de coleta no mapa.

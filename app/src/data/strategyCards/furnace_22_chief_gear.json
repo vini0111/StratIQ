@@ -1,0 +1,14 @@
+{
+  "id": "FURNACE_22_CHIEF_GEAR",
+  "name": "Chief Gear disponível",
+  "domain": "growth",
+  "priority": "high",
+  "conditions": [
+    { "field": "furnaceLevel", "op": "gte", "value": 22 },
+    { "field": "furnaceLevel", "op": "lt", "value": 25 }
+  ],
+  "recommendation": "A Fornalha 22 libera Chief Gear (equipamento de comandante). Priorize entender e começar essa progressão — costuma virar prioridade de longo prazo.",
+  "explanation": "Marco de desbloqueio por nível de Fornalha. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).",
+  "impact": "high",
+  "confidence": 0.65
+}

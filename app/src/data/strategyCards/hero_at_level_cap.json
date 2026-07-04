@@ -1,0 +1,11 @@
+{
+  "id": "HERO_AT_LEVEL_CAP",
+  "name": "Herói no limite de nível da Fornalha atual",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [{ "field": "heroes", "op": "anyHeroAtOrAboveLevel", "value": "$derived.maxHeroLevel" }],
+  "recommendation": "Um dos seus heróis favoritos já está no nível máximo permitido pela sua Fornalha atual. Recursos de nivelamento nele agora não geram efeito — redirecione para outro herói ou para subir a Fornalha.",
+  "explanation": "O nível máximo de herói é limitado por marcos de nível de Fornalha (ex.: Fornalha 17 → nível 43, Fornalha 18 → nível 46). Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha) — resolve o item 4 do BACKLOG-v1.",
+  "impact": "medium",
+  "confidence": 0.65
+}

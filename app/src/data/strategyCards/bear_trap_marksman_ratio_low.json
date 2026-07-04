@@ -1,0 +1,15 @@
+{
+  "id": "BEAR_TRAP_MARKSMAN_RATIO_LOW",
+  "name": "Composição atual não está otimizada para Armadilha do Urso",
+  "domain": "battle",
+  "priority": "high",
+  "conditions": [
+    { "field": "currentEvents", "op": "contains", "value": "Urso" },
+    { "field": "derived.totalTroops", "op": "gt", "value": 0 },
+    { "field": "derived.troopCompositionPct.marksman", "op": "lt", "value": 50 }
+  ],
+  "recommendation": "Na Armadilha do Urso ativa agora, Atiradores são só ~{{derived.troopCompositionPct.marksman}}% da sua tropa. O ideal para esse evento é bem mais concentrado em Atiradores (guias apontam até ~60-80%). Priorize enviar sua marcha com o maior número de Atiradores disponível.",
+  "explanation": "Refina BEAR_TRAP_DPS_COMPOSITION com o dado real de composição do jogador em vez de um aviso genérico. Bear Trap recompensa dano total em ~30 minutos — Atiradores dão o maior DPS sustentado do jogo. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas / Bear Trap).",
+  "impact": "high",
+  "confidence": 0.6
+}

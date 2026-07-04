@@ -73,22 +73,19 @@ Depois da Fornalha subir de nível, quatro pedidos maiores. Avaliados individual
 ### A. Progressão de Fornalha (próximas melhorias) — ✅ Implementado
 Ver item 4 (reaproveitou a mesma fonte) + 5 novas cards de marco de Fornalha (18: Pets, 20: Mastery Forging, 22: Chief Gear, 25: Chief Gear Charms, 30: Fire Crystal). Isso resolveu o pedido concreto que motivou a pergunta.
 
-### B. Previsão de calendário de eventos (Timeline Engine)
-Pedido: saber os próximos eventos com antecedência para planejar coleta de gemas/recursos.
-**O que seria necessário:** KNOWLEDGE-001 já tem a frequência de cada evento (Lucky Wheel a cada 2 semanas, SvS ~mensal, Mobilização a cada 4 semanas) — falta um ponto de ancoragem (quando foi a última ocorrência) para calcular a próxima data. Isso poderia vir do próprio histórico de check-ins (primeira vez que detectarmos "Roda da Sorte" ativa vira a âncora), mas com poucos dias de uso ainda não temos histórico suficiente para isso ser confiável.
-**Esforço estimado:** médio — motor de datas (Timeline Engine) + mudança nas Strategy Cards para aceitar texto com valores calculados (hoje o texto é fixo; "faltam X dias" exige um pequeno sistema de template).
-**Por que não agora:** falta o ponto de ancoragem real (poucos dias de dado) e a funcionalidade de template no motor. Bom candidato para quando tivermos 3-4 semanas de histórico.
+### B. Previsão de calendário de eventos (Timeline Engine) — ✅ Implementado em 2026-07-03
+Implementado `src/lib/eventTimeline.ts`: cadência conhecida por evento (Roda da Sorte 14d, Mobilização da Aliança 28d, SvS 30d) ancorada na última vez que o próprio histórico de check-ins (`currentEvents`) registrou aquele evento como ativo. `buildContext` agora recebe o histórico completo de snapshots e expõe `derived.eventTimeline.<evento>.daysUntilNext`. Três novas cards consomem isso via template: `UPCOMING_LUCKY_WHEEL`, `UPCOMING_SVS`, `UPCOMING_ALLIANCE_MOBILIZATION`. Continua sendo estimativa (não data oficial) e melhora conforme mais check-ins acumulam — se o jogador nunca marcou um evento como ativo, a card correspondente simplesmente não dispara (sem ponto de ancoragem).
 
-### C. Avaliação de crescimento militar / nível de tropas (Battle Domain)
+### C. Avaliação de crescimento militar / nível de tropas (Battle Domain) — ✅ Implementado em 2026-07-03 (versão enxuta)
 Pedido: o app avaliar tropas, não só fornalha/VIP/gemas/poder.
-**O que seria necessário:** campo novo inteiro — hoje não coletamos composição de tropas (tier, quantidade por tipo: Infantaria/Lanceiro/Atirador). Precisaria de novos campos no formulário, no schema, e conhecimento sobre tiers de tropas (custo, poder por tropa) para gerar recomendação, não só exibir número.
-**Esforço estimado:** alto — é um domínio de dado novo inteiro (Battle Domain), não uma extensão de algo existente.
-**Por que não agora:** é o maior item desta lista. Vale abrir como rodada própria, não emendado em outros pedidos.
 
-### D. Previsão de chegada de novas gerações de heróis
-Pedido: prever quando novos heróis vão aparecer conforme o estado avança.
-**O que seria necessário:** já temos parte da pesquisa (gerações por idade do servidor: Gen1 1-40 dias, Gen2 40-120 dias, etc. — ver conversa de pesquisa de heróis). Falta só 1 campo novo: data de criação do estado (perguntado uma vez no perfil, não toda semana). Com isso dá para calcular idade do estado e estimar geração atual/próxima.
-**Esforço estimado:** baixo-médio — o campo é barato, mas mostrar "faltam X dias" no texto da recomendação esbarra na mesma limitação do item B (cards não suportam texto com valor calculado ainda).
-**Por que não agora:** mais barato que B e C, mas depende da mesma melhoria de base (templates nas cards) para ficar realmente útil (senão vira um aviso genérico "nova geração pode estar próxima", sem contagem de dias).
+Perguntado ao usuário qual granularidade ele topava preencher toda semana (só total por tipo vs. detalhe por tier vs. nada, inferindo só do Poder). Escolhida a opção enxuta: novos campos `troopsInfantry`/`troopsLancer`/`troopsMarksman` (contagem total por tipo) + `highestTierTraining` (tier mais alto em treino, T1-T12) no snapshot semanal — migração `0005_troop_tracking.sql`. Sem granularidade por tier individual (isso continua fora de escopo — ver nota abaixo).
 
-**Recomendação de ordem, se formos continuar:** D e B compartilham a mesma peça de infraestrutura (suporte a texto calculado nas cards) — vale resolver isso uma vez e destravar os dois juntos. C é independente e maior — melhor tratar como rodada própria quando decidirmos investir num domínio de dado novo.
+Motor ganhou `derived.totalTroops`, `derived.troopCompositionPct` (percentual por tipo) e `derived.troopsDelta` (vs. check-in anterior). Quatro novas cards: `TROOP_COMPOSITION_LOW_MARKSMAN` (poucos Atiradores vs. proporção de referência ~30%), `TROOP_COMPOSITION_OVER_INFANTRY` (composição concentrada demais em tanque), `TROOP_GROWTH_STAGNATION` (tropa não cresce + aceleradores de treino acumulados), e `BEAR_TRAP_MARKSMAN_RATIO_LOW` (refina a card qualitativa existente de Bear Trap com o percentual real de Atiradores do jogador). Evolução do Dashboard ganhou sparkline de "Tropas (total)".
+
+**O que ficou de fora, deliberadamente:** granularidade por tier (quantas tropas de cada T1-T12 especificamente) — exigiria uma tabela de preenchimento semanal grande; o usuário preferiu a versão enxuta. Se isso for revisitado, teria que vir com uma UI dedicada (não mais um campo de formulário simples) para não sobrecarregar o check-in semanal.
+
+### D. Previsão de chegada de novas gerações de heróis — ✅ Implementado em 2026-07-03
+Novo campo opcional `stateFoundedDate` no perfil (perguntado uma vez, não toda semana). O motor calcula `derived.stateAgeDays` e mapeia para geração via `HERO_GENERATION_MILESTONES` (faixas aproximadas de guias da comunidade, não confirmadas oficialmente — ver KNOWLEDGE-001). Nova card `NEXT_HERO_GENERATION_ETA` mostra "Geração X chega em ~Y dias" via template. Se o jogador não preencher a data, a card simplesmente não dispara (sem degradar para aviso genérico).
+
+**Infraestrutura compartilhada:** B e D usaram a mesma peça de base — suporte a texto calculado (`{{caminho.para.valor}}`) em `recommendation`/`explanation`, implementado uma vez em `strategyEngine.ts` (`interpolate()`) e reaproveitado pelos dois. C (avaliação de tropas) continua independente e é o próximo item a abrir como rodada própria.

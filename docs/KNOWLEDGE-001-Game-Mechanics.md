@@ -111,6 +111,47 @@ Destaque: **Zinman** aparece consistentemente como tier SSS/top, mas por uma hab
 
 Fonte: busca dirigida por nome em julho/2026 (BlueStacks, Theria Games, Whiteout Survival Wiki, Medium/Medieval Fun, One Chilled Gamer, gamestouse.com — ver linhas de conversa para URLs específicas por herói). Não é uma fonte única consolidada — tratar como ponto de partida, não verdade definitiva. Charlie, Eugenio, Smith e Lumak Bokan merecem confirmação in-game antes de qualquer decisão baseada neles.
 
-## Open question para o futuro
+## Tropas (Battle Domain)
 
-Vários guias amarram geração de herói recomendada à **idade do servidor** (dias desde a criação do estado) — não coletamos esse campo hoje. Fica registrado como candidato a novo campo do snapshot (ver BACKLOG-v1), não implementado agora para não expandir o formulário sem necessidade validada.
+Três tipos, ciclo de contra-ataque tipo pedra-papel-tesoura: **Infantaria vence Lanceiro → Lanceiro vence Atirador → Atirador vence Infantaria** (cada vantagem = ~10-20% de bônus de ataque/redução de dano, dependendo da fonte). Atirador é a principal fonte de dano do jogo, mas depende de Infantaria/Lanceiro para absorver dano na frente.
+
+Tiers vão de **T1 a T12**: cada tier melhora status de combate, pontos de evento e custo/tempo de treino. T11 exige a construção War Academy; T12 ("Exalted") exige War Academy + Fire Crystal FC10 e pesquisas Exalted. Na prática, a maioria dos jogadores ativos treina/promove principalmente T10/T11 — promover um tier já treinado costuma ser muito mais barato em tempo do que treinar do zero no tier novo.
+
+Proporções de composição citadas pelos guias (ajustáveis por objetivo, não uma regra fixa):
+- Balanceada/geral: **50% Infantaria / 20% Lanceiro / 30% Atirador**
+- Foco em dano (ataque): 40/20/40 ou 50/10/40
+- Foco em sobrevivência (defesa): 60% Infantaria / 20% / 20%
+- Armadilha do Urso (Bear Trap): fortemente concentrada em Atirador — até 80% se disponível, ou 60% como alternativa (10/10/80 ou 20/20/60)
+
+MVP do StratIQ (2026-07-03) coleta só o total por tipo (Infantaria/Lanceiro/Atirador) + tier mais alto em treino no momento — sem granularidade por tier individual (custo de preenchimento semanal vs. valor da recomendação; ver BACKLOG-v1 item C). `derived.troopCompositionPct` e `derived.totalTroops`/`derived.troopsDelta` no motor usam esses totais para comparar contra as proporções de referência acima.
+
+Fonte: [One Chilled Gamer — Troop Guide](https://onechilledgamer.com/whiteout-survival-troop-guide/), [WoS Tools Wiki — Troops](https://wostools.net/wiki/troops), [BlueStacks — War Academy/T11 Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-troops-upgrade-guide-en.html), [A Jack Of — Best Troop Formation & Ratio](https://www.ajackof.com/games/whiteout-survival-wos/whiteout-survival-best-troop-formation-ratio/), [topuplive.com — Troop Types, Ratios & Recommendations](https://www.topuplive.com/news/whiteout-survival-troops-guide.html).
+
+## Cadência de eventos (usada pelo Timeline Engine)
+
+Valores usados por `src/lib/eventTimeline.ts` (`EVENT_CADENCES`) para estimar a próxima ocorrência de um evento a partir da última vez que o próprio histórico de check-ins do jogador o registrou como ativo:
+
+| Evento | Cadência |
+|---|---|
+| Roda da Sorte | 14 dias |
+| Mobilização da Aliança | 28 dias |
+| SvS | 30 dias |
+
+Fonte: mesma desta página (seções Lucky Wheel, Alliance Mobilization, SvS acima). Ver BACKLOG-v1, item B.
+
+## Geração de herói por idade do estado
+
+Vários guias amarram geração de herói recomendada à **idade do servidor** (dias desde a criação do estado). Implementado em 2026-07-03 via campo opcional `stateFoundedDate` no perfil + `HERO_GENERATION_MILESTONES` em `src/lib/strategyEngine.ts`:
+
+| Idade do estado (dias) | Geração |
+|---|---|
+| 1+ | 1 |
+| 40+ | 2 |
+| 120+ | 3 |
+| 200+ | 4 |
+| 280+ | 5 |
+| 360+ | 6 |
+| 440+ | 7 |
+| 520+ | 8 |
+
+Faixas aproximadas coletadas de guias da comunidade durante a pesquisa de heróis (ver seção Heróis acima) — **não confirmadas oficialmente**. Tratar como estimativa, não data garantida. Ver BACKLOG-v1, item D.

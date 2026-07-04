@@ -1,0 +1,14 @@
+{
+  "id": "TROOP_COMPOSITION_OVER_INFANTRY",
+  "name": "Composição concentrada demais em Infantaria",
+  "domain": "battle",
+  "priority": "low",
+  "conditions": [
+    { "field": "derived.totalTroops", "op": "gt", "value": 0 },
+    { "field": "derived.troopCompositionPct.infantry", "op": "gt", "value": 70 }
+  ],
+  "recommendation": "Infantaria é ~{{derived.troopCompositionPct.infantry}}% da sua tropa — bom para defesa/tanque, mas essa composição entrega pouco dano ofensivo. Se seu objetivo é ataque/rally, vale balancear com mais Lanceiros e Atiradores.",
+  "explanation": "Infantaria tem alta defesa/vida e conta Lanceiros, mas sozinha entrega pouco dano. Composições muito concentradas em um tipo só ficam vulneráveis ao contra-ataque específico do tipo que elas não cobrem. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas).",
+  "impact": "low",
+  "confidence": 0.5
+}

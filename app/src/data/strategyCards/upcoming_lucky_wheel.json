@@ -1,0 +1,14 @@
+{
+  "id": "UPCOMING_LUCKY_WHEEL",
+  "name": "Roda da Sorte se aproximando",
+  "domain": "events",
+  "priority": "high",
+  "conditions": [
+    { "field": "derived.eventTimeline.rodaDaSorte.daysUntilNext", "op": "lte", "value": 3 },
+    { "field": "currentEvents", "op": "neq", "value": "Roda da Sorte" }
+  ],
+  "recommendation": "A Roda da Sorte deve começar em ~{{derived.eventTimeline.rodaDaSorte.daysUntilNext}} dia(s), com base no seu histórico de check-ins. Comece a guardar gemas se ainda não estiver.",
+  "explanation": "Estimativa calculada a partir da última vez que você marcou a Roda da Sorte como ativa + a cadência de 14 dias do evento. Não é uma data oficial do jogo — melhora conforme mais check-ins acumulam. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md.",
+  "impact": "medium",
+  "confidence": 0.5
+}

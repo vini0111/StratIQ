@@ -73,12 +73,12 @@ export default function Dashboard({
 
   const { semaphore, recommendations } = useMemo(() => {
     if (!latest) return { semaphore: null, recommendations: [] }
-    const context = buildContext(latest, profile, previous)
+    const context = buildContext(latest, profile, previous, snapshots)
     return {
       semaphore: computeSemaphore(context),
       recommendations: evaluateStrategyCards(strategyCards, context),
     }
-  }, [latest, previous, profile])
+  }, [latest, previous, profile, snapshots])
 
   return (
     <div>
@@ -133,6 +133,7 @@ export default function Dashboard({
           <HistorySparkline snapshots={snapshots} field="vipLevel" label="VIP" />
           <HistorySparkline snapshots={snapshots} field="gems" label="Gemas" />
           <HistorySparkline snapshots={snapshots} field="power" label="Poder" />
+          <HistorySparkline snapshots={snapshots} field="totalTroops" label="Tropas (total)" />
         </div>
       )}
 

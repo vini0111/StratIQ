@@ -26,6 +26,7 @@ export interface Profile {
   financialProfile: FinancialProfile
   objective: Objective
   hasSecondBuilder: boolean
+  stateFoundedDate?: string
   createdAt?: string
 }
 
@@ -54,6 +55,10 @@ export interface WeeklySnapshot {
   currentResearch: string
   currentBuilding: string
   currentBuilding2?: string
+  troopsInfantry: number
+  troopsLancer: number
+  troopsMarksman: number
+  highestTierTraining?: string
   weeklyQuestion?: string
   createdAt?: string
 }

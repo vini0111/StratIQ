@@ -14,6 +14,7 @@ create table if not exists public.profiles (
     )
   ),
   has_second_builder boolean not null default false,
+  state_founded_date date,
   created_at timestamptz not null default now()
 );
 
@@ -47,6 +48,10 @@ create table if not exists public.weekly_snapshots (
   current_research text,
   current_building text,
   current_building_2 text,
+  troops_infantry bigint not null default 0,
+  troops_lancer bigint not null default 0,
+  troops_marksman bigint not null default 0,
+  highest_tier_training text,
   weekly_question text,
   created_at timestamptz not null default now()
 );

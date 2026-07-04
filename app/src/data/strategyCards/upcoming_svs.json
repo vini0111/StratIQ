@@ -1,0 +1,14 @@
+{
+  "id": "UPCOMING_SVS",
+  "name": "SvS se aproximando",
+  "domain": "events",
+  "priority": "high",
+  "conditions": [
+    { "field": "derived.eventTimeline.svs.daysUntilNext", "op": "lte", "value": 5 },
+    { "field": "currentEvents", "op": "neq", "value": "SvS" }
+  ],
+  "recommendation": "A SvS deve começar em ~{{derived.eventTimeline.svs.daysUntilNext}} dia(s). Evite gastar aceleradores grandes agora — guarde para os dias temáticos da fase de preparação.",
+  "explanation": "Estimativa calculada a partir da última vez que você marcou SvS como ativa + cadência de ~30 dias. Não é uma data oficial do jogo. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção SvS).",
+  "impact": "high",
+  "confidence": 0.5
+}

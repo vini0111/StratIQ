@@ -11,10 +11,14 @@ export default function HistorySparkline({
   label,
 }: {
   snapshots: WeeklySnapshot[]
-  field: 'furnaceLevel' | 'vipLevel' | 'gems' | 'power'
+  field: 'furnaceLevel' | 'vipLevel' | 'gems' | 'power' | 'totalTroops'
   label: string
 }) {
-  const values = snapshots.map((s) => s[field] as number)
+  const values = snapshots.map((s) =>
+    field === 'totalTroops'
+      ? s.troopsInfantry + s.troopsLancer + s.troopsMarksman
+      : (s[field] as number)
+  )
   const max = Math.max(...values, 1)
   const current = values[values.length - 1]
   const previous = values.length > 1 ? values[values.length - 2] : null

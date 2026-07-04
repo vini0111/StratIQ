@@ -33,6 +33,14 @@ import furnace22ChiefGear from './furnace_22_chief_gear.json'
 import furnace25ChiefGearCharms from './furnace_25_chief_gear_charms.json'
 import furnace30FireCrystal from './furnace_30_fire_crystal.json'
 import heroAtLevelCap from './hero_at_level_cap.json'
+import upcomingLuckyWheel from './upcoming_lucky_wheel.json'
+import upcomingSvs from './upcoming_svs.json'
+import upcomingAllianceMobilization from './upcoming_alliance_mobilization.json'
+import nextHeroGenerationEta from './next_hero_generation_eta.json'
+import troopCompositionLowMarksman from './troop_composition_low_marksman.json'
+import troopCompositionOverInfantry from './troop_composition_over_infantry.json'
+import troopGrowthStagnation from './troop_growth_stagnation.json'
+import bearTrapMarksmanRatioLow from './bear_trap_marksman_ratio_low.json'
 
 export const strategyCards = [
   saveGemsBaselineReserve,
@@ -62,4 +70,12 @@ export const strategyCards = [
   furnace25ChiefGearCharms,
   furnace30FireCrystal,
   heroAtLevelCap,
+  upcomingLuckyWheel,
+  upcomingSvs,
+  upcomingAllianceMobilization,
+  nextHeroGenerationEta,
+  troopCompositionLowMarksman,
+  troopCompositionOverInfantry,
+  troopGrowthStagnation,
+  bearTrapMarksmanRatioLow,
 ] as unknown as StrategyCard[]

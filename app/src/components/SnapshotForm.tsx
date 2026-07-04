@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import type { HeroEntry, Profile, WeeklySnapshot } from '../types'
-import { KNOWN_BUILDINGS, KNOWN_EVENTS, KNOWN_HEROES, KNOWN_RESEARCH } from '../data/knownOptions'
+import {
+  KNOWN_BUILDINGS,
+  KNOWN_EVENTS,
+  KNOWN_HEROES,
+  KNOWN_RESEARCH,
+  KNOWN_TROOP_TIERS,
+} from '../data/knownOptions'
 import { ACCELERATOR_UNIT_LABELS, AcceleratorUnit, toDecimalDays } from '../lib/accelerators'
 import AcceleratorInput from './AcceleratorInput'
 
@@ -25,6 +31,10 @@ const blankDraft: DraftSnapshot = {
   currentResearch: '',
   currentBuilding: '',
   currentBuilding2: '',
+  troopsInfantry: 0,
+  troopsLancer: 0,
+  troopsMarksman: 0,
+  highestTierTraining: '',
   weeklyQuestion: '',
 }
 
@@ -53,6 +63,10 @@ function buildInitialDraft(last: WeeklySnapshot | null): DraftSnapshot {
     currentResearch: last.currentResearch,
     currentBuilding: last.currentBuilding,
     currentBuilding2: last.currentBuilding2 ?? '',
+    troopsInfantry: last.troopsInfantry,
+    troopsLancer: last.troopsLancer,
+    troopsMarksman: last.troopsMarksman,
+    highestTierTraining: last.highestTierTraining ?? '',
   }
 }
 
@@ -208,6 +222,54 @@ export default function SnapshotForm({
         value={draft.power}
         onChange={(e) => update('power', Number(e.target.value))}
       />
+
+      <label>Tropas (total por tipo)</label>
+      <div className="grid-2">
+        <div>
+          <label className="muted">Infantaria</label>
+          <input
+            type="number"
+            min={0}
+            value={draft.troopsInfantry}
+            onChange={(e) => update('troopsInfantry', Number(e.target.value) || 0)}
+          />
+        </div>
+        <div>
+          <label className="muted">Lanceiros</label>
+          <input
+            type="number"
+            min={0}
+            value={draft.troopsLancer}
+            onChange={(e) => update('troopsLancer', Number(e.target.value) || 0)}
+          />
+        </div>
+      </div>
+      <div className="grid-2">
+        <div>
+          <label className="muted">Atiradores (Marksman)</label>
+          <input
+            type="number"
+            min={0}
+            value={draft.troopsMarksman}
+            onChange={(e) => update('troopsMarksman', Number(e.target.value) || 0)}
+          />
+        </div>
+        <div>
+          <label className="muted">Tier mais alto em treino</label>
+          <input
+            type="text"
+            list="troop-tiers-list"
+            placeholder="ex.: T8"
+            value={draft.highestTierTraining ?? ''}
+            onChange={(e) => update('highestTierTraining', e.target.value)}
+          />
+        </div>
+      </div>
+      <datalist id="troop-tiers-list">
+        {KNOWN_TROOP_TIERS.map((t) => (
+          <option key={t} value={t} />
+        ))}
+      </datalist>
 
       <label>Aceleradores disponíveis agora</label>
       <div style={{ marginBottom: 8 }}>

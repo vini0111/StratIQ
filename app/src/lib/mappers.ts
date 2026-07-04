@@ -11,6 +11,7 @@ export function profileFromRow(row: any): Profile {
     financialProfile: row.financial_profile,
     objective: row.objective,
     hasSecondBuilder: row.has_second_builder ?? false,
+    stateFoundedDate: row.state_founded_date ?? undefined,
     createdAt: row.created_at,
   }
 }
@@ -23,6 +24,7 @@ export function profileToRow(profile: Omit<Profile, 'id' | 'createdAt'>, userId:
     financial_profile: profile.financialProfile,
     objective: profile.objective,
     has_second_builder: profile.hasSecondBuilder,
+    state_founded_date: profile.stateFoundedDate || null,
   }
 }
 
@@ -46,6 +48,10 @@ export function snapshotFromRow(row: any): WeeklySnapshot {
     currentResearch: row.current_research ?? '',
     currentBuilding: row.current_building ?? '',
     currentBuilding2: row.current_building_2 ?? '',
+    troopsInfantry: row.troops_infantry ?? 0,
+    troopsLancer: row.troops_lancer ?? 0,
+    troopsMarksman: row.troops_marksman ?? 0,
+    highestTierTraining: row.highest_tier_training ?? undefined,
     weeklyQuestion: row.weekly_question ?? '',
     createdAt: row.created_at,
   }
@@ -73,6 +79,10 @@ export function snapshotToRow(
     current_research: snapshot.currentResearch,
     current_building: snapshot.currentBuilding,
     current_building_2: snapshot.currentBuilding2 || null,
+    troops_infantry: snapshot.troopsInfantry,
+    troops_lancer: snapshot.troopsLancer,
+    troops_marksman: snapshot.troopsMarksman,
+    highest_tier_training: snapshot.highestTierTraining || null,
     weekly_question: snapshot.weeklyQuestion,
   }
 }

@@ -1,0 +1,14 @@
+{
+  "id": "TROOP_COMPOSITION_LOW_MARKSMAN",
+  "name": "Poucos Atiradores (Marksman) na composição",
+  "domain": "battle",
+  "priority": "medium",
+  "conditions": [
+    { "field": "derived.totalTroops", "op": "gt", "value": 0 },
+    { "field": "derived.troopCompositionPct.marksman", "op": "lt", "value": 15 }
+  ],
+  "recommendation": "Atiradores são só ~{{derived.troopCompositionPct.marksman}}% da sua tropa. Eles são a principal fonte de dano do jogo (contam Infantaria); a referência geral é ~30% em composições balanceadas. Priorize treinar/promover Atiradores nas próximas semanas.",
+  "explanation": "Sistema de contra-ataque tipo pedra-papel-tesoura: Infantaria > Lanceiro > Atirador > Infantaria. Atirador é o dano principal, mas depende de Infantaria/Lanceiro para absorver dano. Proporção de referência (~50 Infantaria/20 Lanceiro/30 Atirador) vem de guias da comunidade, ajustável por objetivo. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas).",
+  "impact": "medium",
+  "confidence": 0.55
+}

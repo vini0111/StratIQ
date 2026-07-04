@@ -1,0 +1,14 @@
+{
+  "id": "TROOP_GROWTH_STAGNATION",
+  "name": "Crescimento militar estagnado com aceleradores parados",
+  "domain": "battle",
+  "priority": "medium",
+  "conditions": [
+    { "field": "derived.troopsDelta", "op": "lte", "value": 0 },
+    { "field": "accelTrainingDays", "op": "gt", "value": 10 }
+  ],
+  "recommendation": "Sua tropa total não cresceu desde o último check-in e você tem mais de 10 dias de aceleradores de treino parados. Coloque tropas na fila — aceleradores guardados não geram poder.",
+  "explanation": "Combina o delta de tropas entre check-ins (derived.troopsDelta) com o acúmulo de aceleradores de treino já sinalizado por ACCELERATOR_HOARDING_TRAINING, mas aqui confirma que o acúmulo está de fato coincidindo com estagnação militar real, não só uma reserva estratégica temporária.",
+  "impact": "medium",
+  "confidence": 0.6
+}

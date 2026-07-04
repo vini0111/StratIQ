@@ -6,11 +6,12 @@ import type {
   StrategyCondition,
   WeeklySnapshot,
 } from '../types'
+import { computeEventTimeline, type EventTimelineEntry } from './eventTimeline'
 
 // O Strategy Engine avalia Strategy Cards (dados, não código) contra um
-// "contexto" derivado do snapshot atual + perfil + snapshot anterior.
-// Regra de ouro (ver docs/VISION): a IA nunca decide sozinha; este motor decide,
-// qualquer camada de IA futura apenas explica o que ele já concluiu.
+// "contexto" derivado do snapshot atual + perfil + histórico. Regra de ouro
+// (ver docs/VISION): a IA nunca decide sozinha; este motor decide, qualquer
+// camada de IA futura apenas explica o que ele já concluiu.
 
 export interface EvalContext {
   [key: string]: unknown
@@ -25,6 +26,14 @@ export interface EvalContext {
     powerDelta: number | null
     gemsDelta: number | null
     maxHeroLevel: number
+    eventTimeline: Record<string, EventTimelineEntry>
+    stateAgeDays: number | null
+    currentHeroGeneration: number | null
+    nextHeroGeneration: number | null
+    daysUntilNextHeroGeneration: number | null
+    totalTroops: number
+    troopCompositionPct: { infantry: number; lancer: number; marksman: number }
+    troopsDelta: number | null
   }
 }
 
@@ -38,7 +47,6 @@ const RESERVE_THRESHOLD_BY_PROFILE: Record<Profile['financialProfile'], number> 
 
 // Nível máximo de herói liberado por nível de Fornalha (cresce em marcos, não
 // a cada nível). Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).
-// Lista ordenada; usamos o maior marco <= ao nível atual da fornalha.
 const MAX_HERO_LEVEL_MILESTONES: [furnaceLevel: number, maxHeroLevel: number][] = [
   [4, 20],
   [10, 22],
@@ -68,11 +76,83 @@ function computeMaxHeroLevel(furnaceLevel: number): number {
   return cap
 }
 
+// Geração de herói por idade do estado (dias desde a fundação). Fonte:
+// docs/KNOWLEDGE-001-Game-Mechanics.md (seção Heróis) — faixas aproximadas
+// coletadas de guias, não confirmadas oficialmente.
+const HERO_GENERATION_MILESTONES: [ageDays: number, generation: number][] = [
+  [1, 1],
+  [40, 2],
+  [120, 3],
+  [200, 4],
+  [280, 5],
+  [360, 6],
+  [440, 7],
+  [520, 8],
+]
+
+function computeHeroGenerationInfo(stateAgeDays: number | null): {
+  currentHeroGeneration: number | null
+  nextHeroGeneration: number | null
+  daysUntilNextHeroGeneration: number | null
+} {
+  if (stateAgeDays === null) {
+    return { currentHeroGeneration: null, nextHeroGeneration: null, daysUntilNextHeroGeneration: null }
+  }
+  let currentGeneration = 1
+  let nextThreshold: number | null = null
+  for (const [ageThreshold, generation] of HERO_GENERATION_MILESTONES) {
+    if (stateAgeDays >= ageThreshold) {
+      currentGeneration = generation
+    } else {
+      nextThreshold = ageThreshold
+      break
+    }
+  }
+  return {
+    currentHeroGeneration: currentGeneration,
+    nextHeroGeneration: nextThreshold !== null ? currentGeneration + 1 : null,
+    daysUntilNextHeroGeneration: nextThreshold !== null ? nextThreshold - stateAgeDays : null,
+  }
+}
+
+// Battle Domain (avaliação de tropas) — MVP enxuto: só total por tipo, sem
+// granularidade por tier individual. Ver docs/BACKLOG-v1.md item C e
+// docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas) para a origem das
+// proporções de referência usadas nas Strategy Cards.
+function computeTroopComposition(
+  infantry: number,
+  lancer: number,
+  marksman: number
+): { infantry: number; lancer: number; marksman: number } {
+  const total = infantry + lancer + marksman
+  if (total === 0) return { infantry: 0, lancer: 0, marksman: 0 }
+  return {
+    infantry: (infantry / total) * 100,
+    lancer: (lancer / total) * 100,
+    marksman: (marksman / total) * 100,
+  }
+}
+
+function computeStateAgeDays(stateFoundedDate: string | undefined, today: Date): number | null {
+  if (!stateFoundedDate) return null
+  const founded = new Date(stateFoundedDate)
+  if (Number.isNaN(founded.getTime())) return null
+  return Math.floor((today.getTime() - founded.getTime()) / 86_400_000)
+}
+
 export function buildContext(
   snapshot: WeeklySnapshot,
   profile: Profile,
-  previousSnapshot: WeeklySnapshot | null
+  previousSnapshot: WeeklySnapshot | null,
+  allSnapshots: WeeklySnapshot[] = []
 ): EvalContext {
+  const stateAgeDays = computeStateAgeDays(profile.stateFoundedDate, new Date())
+  const heroGenerationInfo = computeHeroGenerationInfo(stateAgeDays)
+  const totalTroops = snapshot.troopsInfantry + snapshot.troopsLancer + snapshot.troopsMarksman
+  const previousTotalTroops = previousSnapshot
+    ? previousSnapshot.troopsInfantry + previousSnapshot.troopsLancer + previousSnapshot.troopsMarksman
+    : null
+
   return {
     ...snapshot,
     profile: {
@@ -86,6 +166,16 @@ export function buildContext(
       powerDelta: previousSnapshot ? snapshot.power - previousSnapshot.power : null,
       gemsDelta: previousSnapshot ? snapshot.gems - previousSnapshot.gems : null,
       maxHeroLevel: computeMaxHeroLevel(snapshot.furnaceLevel),
+      eventTimeline: computeEventTimeline(allSnapshots.length > 0 ? allSnapshots : [snapshot]),
+      stateAgeDays,
+      ...heroGenerationInfo,
+      totalTroops,
+      troopCompositionPct: computeTroopComposition(
+        snapshot.troopsInfantry,
+        snapshot.troopsLancer,
+        snapshot.troopsMarksman
+      ),
+      troopsDelta: previousTotalTroops !== null ? totalTroops - previousTotalTroops : null,
     },
   }
 }
@@ -182,6 +272,20 @@ export function evaluateCard(card: StrategyCard, context: EvalContext): boolean 
   return card.conditions.every((condition) => evaluateCondition(condition, context))
 }
 
+// Suporte a texto calculado: "{{caminho.para.valor}}" é substituído pelo
+// valor real do contexto no momento da renderização. Se o caminho não
+// existir (não deveria acontecer, já que as condições da própria card
+// garantem que o valor existe antes dela disparar), o placeholder é mantido
+// visível para facilitar debug em vez de quebrar silenciosamente.
+function interpolate(text: string, context: EvalContext): string {
+  return text.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (match, path: string) => {
+    const value = getField(context, path)
+    if (value === undefined || value === null) return match
+    if (typeof value === 'number') return String(Math.round(value))
+    return String(value)
+  })
+}
+
 const PRIORITY_ORDER: Record<StrategyCard['priority'], number> = {
   very_high: 0,
   high: 1,
@@ -200,4 +304,9 @@ export function evaluateStrategyCards(
       if (byPriority !== 0) return byPriority
       return b.confidence - a.confidence
     })
+    .map((card) => ({
+      ...card,
+      recommendation: interpolate(card.recommendation, context),
+      explanation: interpolate(card.explanation, context),
+    }))
 }

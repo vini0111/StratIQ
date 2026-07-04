@@ -1,0 +1,14 @@
+{
+  "id": "UPCOMING_ALLIANCE_MOBILIZATION",
+  "name": "Mobilização da Aliança se aproximando",
+  "domain": "events",
+  "priority": "medium",
+  "conditions": [
+    { "field": "derived.eventTimeline.mobilizacaoDaAlianca.daysUntilNext", "op": "lte", "value": 3 },
+    { "field": "currentEvents", "op": "neq", "value": "Mobilização da Aliança" }
+  ],
+  "recommendation": "A Mobilização da Aliança deve começar em ~{{derived.eventTimeline.mobilizacaoDaAlianca.daysUntilNext}} dia(s). Planeje as missões, mas lembre-se: não gaste aceleradores grandes nela.",
+  "explanation": "Estimativa calculada a partir da última vez que você marcou o evento como ativo + cadência de 28 dias. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Alliance Mobilization).",
+  "impact": "medium",
+  "confidence": 0.5
+}

@@ -39,6 +39,7 @@ export default function ProfileSetup({
   )
   const [objective, setObjective] = useState<Objective>(initialProfile?.objective ?? 'balanced')
   const [hasSecondBuilder, setHasSecondBuilder] = useState(initialProfile?.hasSecondBuilder ?? false)
+  const [stateFoundedDate, setStateFoundedDate] = useState(initialProfile?.stateFoundedDate ?? '')
 
   const isEditing = !!initialProfile
 
@@ -47,7 +48,14 @@ export default function ProfileSetup({
       className="card"
       onSubmit={(e) => {
         e.preventDefault()
-        onSubmit({ stateNumber, alliance, financialProfile, objective, hasSecondBuilder })
+        onSubmit({
+          stateNumber,
+          alliance,
+          financialProfile,
+          objective,
+          hasSecondBuilder,
+          stateFoundedDate: stateFoundedDate || undefined,
+        })
       }}
     >
       <Brand size={24} />
@@ -99,6 +107,17 @@ export default function ProfileSetup({
         />
         Já desbloqueei um 2º construtor
       </label>
+
+      <label>Data de criação do estado (opcional)</label>
+      <input
+        type="date"
+        value={stateFoundedDate}
+        onChange={(e) => setStateFoundedDate(e.target.value)}
+      />
+      <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
+        Usada só para estimar quando a próxima geração de heróis deve chegar. Se não souber a
+        data exata, pode deixar em branco ou preencher uma aproximada.
+      </p>
 
       <button type="submit" disabled={submitting}>
         {submitting ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Começar'}

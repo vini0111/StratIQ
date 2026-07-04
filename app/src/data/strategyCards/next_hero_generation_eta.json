@@ -1,0 +1,11 @@
+{
+  "id": "NEXT_HERO_GENERATION_ETA",
+  "name": "Nova geração de heróis se aproximando",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [{ "field": "derived.daysUntilNextHeroGeneration", "op": "lte", "value": 14 }],
+  "recommendation": "A Geração {{derived.nextHeroGeneration}} de heróis deve chegar em ~{{derived.daysUntilNextHeroGeneration}} dia(s), com base na idade do seu estado. Vale começar a guardar gemas/recursos para os novos heróis em vez de gastar tudo agora.",
+  "explanation": "Estimativa baseada em faixas de idade do servidor por geração (ver KNOWLEDGE-001, seção Heróis) — não é uma data oficial, apenas aproximação de guias da comunidade. Depende da data de criação do estado informada no perfil.",
+  "impact": "medium",
+  "confidence": 0.45
+}

@@ -40,6 +40,13 @@ export const KNOWN_BUILDINGS = [
   'Muralha',
 ]
 
+// Tier mais alto de tropa em treino/promoção no momento. T11 exige War
+// Academy; T12 ("Exalted") exige War Academy + Fire Crystal FC10. Ver
+// docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas / Battle Domain).
+export const KNOWN_TROOP_TIERS = [
+  'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12',
+]
+
 export const KNOWN_RESEARCH = [
   'Aprimoramento de Ferramentas',
   'Velocidade de Coleta',

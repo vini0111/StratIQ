@@ -14,9 +14,11 @@ import Brand from '../components/Brand'
 export default function Dashboard({
   profile,
   onEditProfile,
+  onOpenWiki,
 }: {
   profile: Profile
   onEditProfile: () => void
+  onOpenWiki: () => void
 }) {
   const [snapshots, setSnapshots] = useState<WeeklySnapshot[]>([])
   const [loading, setLoading] = useState(true)
@@ -115,6 +117,21 @@ export default function Dashboard({
           }}
         >
           editar perfil
+        </button>{' '}
+        ·{' '}
+        <button
+          type="button"
+          onClick={onOpenWiki}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--accent)',
+            padding: 0,
+            font: 'inherit',
+            cursor: 'pointer',
+          }}
+        >
+          guia e wiki
         </button>
       </p>
 

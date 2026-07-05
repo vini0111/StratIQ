@@ -111,3 +111,21 @@ Cinco pedidos, incluindo um bug crítico de perda de dados:
 - **Tropas: o jogo não mostra total por tipo, só por tier** — ✅ modelo revisado: os 3 campos de total único (Infantaria/Lanceiro/Atirador) viraram uma lista de linhas `{tipo, tier, quantidade}` (`troopEntries`), batendo com a tela real do jogo (ex.: "Infantaria Heróica nível VI: 7.848"). Motor soma por tipo (`sumTroopsByType`) para alimentar as mesmas cards de composição/estagnação sem mudança de lógica. Nomes de tier documentados em KNOWLEDGE-001 (I-XII, com V "Resistente" e VI "Heróica" confirmados pelo jogador; demais tentativos/não confirmados).
 
 **Migração:** `0006_vip_xp_and_troop_entries.sql` cobre as duas mudanças de schema (VIP XP + tropas) — precisa rodar no SQL editor do Supabase antes do próximo check-in.
+
+## Nota 2026-07-05 — changelog do jogo aponta possível simplificação futura das tropas
+
+O jogador compartilhou prints de mensagens de sistema do jogo (05/07/2026). Um item do changelog anuncia que "Detalhes do Esquadrão → Visão Geral das Tropas" passará a mostrar as proporções dos tipos de tropa por padrão — potencialmente uma tela mais simples de ler do que somar tiers manualmente. **Ainda não foi implantada no jogo do jogador** (anunciada, não ativa). Ver KNOWLEDGE-001 (seção Cerco de Inverno) para o outro item novo desse changelog (evento de aliança novo, sem dados ainda).
+
+**Ação futura:** quando essa tela estiver ativa, revisitar o formato de `troopEntries` (ver item C, sexta rodada) — se ela mostrar % ou total por tipo diretamente, pode simplificar a entrada de dados de tropas sem perder a granularidade que já temos no histórico.
+
+## Adendo 2026-07-05 — sétima rodada: Guia e Wiki
+
+Pedido do usuário: seção de guia (iniciantes, SvS, alianças) + wiki (heróis, tropas, construções, eventos, pets) dentro do próprio app, citando o WoS Tools como referência de algo parecido já existente na comunidade.
+
+**Tensão com o posicionamento do produto:** o ADR-000 original e várias conversas de produto ao longo deste projeto (ex.: a reflexão sobre TWStats) definiram StratIQ deliberadamente **contra** ser mais uma ferramenta de exibição de dados como WoS Tools/WoS Calc/WOS Nerds — o diferencial é decisão, não catálogo. Uma seção de wiki estática é, por definição, exibição de dados. Registrando essa tensão aqui explicitamente: decidimos seguir em frente porque (a) o pedido veio do próprio usuário/dono do produto, não de mim inferindo escopo, (b) o conteúdo já existia em grande parte pesquisado e sourced em KNOWLEDGE-001 — o custo marginal de expor isso como leitura no app foi baixo, não uma nova frente de pesquisa do zero, e (c) essa seção é claramente separada do Strategy Engine (não alimenta `derived`, não vira Strategy Card) — não dilui a decisão automatizada, só adiciona uma camada de onboarding/referência ao lado dela.
+
+**O que foi implementado:**
+- Novo domínio de conteúdo `WikiArticle` (`types/index.ts`): `{ id, category, title, summary, sections: [{heading?, paragraphs}], source }`. Cada artigo é um arquivo próprio em `src/data/wiki/` (mesmo padrão de "um arquivo por unidade" já usado nas Strategy Cards), agregados em `src/data/wiki/index.ts`.
+- 10 artigos: 3 guias (iniciante, SvS, alianças) + 7 de wiki (heróis: sistema de gerações + roster do Estado 4465; tropas: tipos/contra-ataque + tiers/progressão; construções: Fornalha + produção; eventos: recorrentes incluindo o Cerco de Inverno em observação; pets — domínio pesquisado pela primeira vez nesta rodada).
+- Nova página `Wiki.tsx`: busca client-side (título/resumo/corpo, sem backend) + filtro por categoria + lista + detalhe do artigo. Acesso via link "guia e wiki" no cabeçalho do Dashboard (`App.tsx` ganhou um `showWiki` state, sem adicionar biblioteca de rotas).
+- Pesquisado nesta rodada: Pets (raridade, categorias de habilidade, evolução/Marcas de Avanço, prioridade F2P), mecânica de Aliança (cargos R1-R5, tecnologia/doações, loja, pedidos de ajuda), checklist de iniciante (prioridades dos primeiros dias). Os demais artigos reaproveitam pesquisa já registrada em KNOWLEDGE-001 (Heróis, Tropas, Fornalha, Eventos, SvS).

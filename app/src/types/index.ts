@@ -114,3 +114,21 @@ export interface SemaphoreState {
   economy: SemaphoreLevel
   battle: SemaphoreLevel
 }
+
+// --- Guia / Wiki (conteúdo educativo, não alimenta o Strategy Engine) ---
+
+export type WikiCategory = 'guia' | 'herois' | 'tropas' | 'construcoes' | 'eventos' | 'pets'
+
+export interface WikiSection {
+  heading?: string
+  paragraphs: string[]
+}
+
+export interface WikiArticle {
+  id: string
+  category: WikiCategory
+  title: string
+  summary: string
+  sections: WikiSection[]
+  source?: string
+}

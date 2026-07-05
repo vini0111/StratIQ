@@ -39,6 +39,10 @@ Fonte: [Whiteout Survival Wiki — Canyon Clash](https://www.whiteoutsurvival.wi
 Um dos poucos eventos **solo** do jogo. Roda a cada 2 semanas, dura ~30 minutos numa zona de combate dedicada.
 Fonte: [BlueStacks — Recurring Events Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-recurring-events-guide-en.html)
 
+### Cerco de Inverno (Winter Siege) — evento novo, em observação
+Anunciado no changelog in-game de 2026-07-05 (mensagem de sistema, servidor do jogador): evento de aliança onde alianças disputam fortalezas — jogadores despacham "esquadrões de guarnição" para defender e atacam fortalezas inimigas para conquistá-las. Cadência, duração e recompensas **ainda não documentadas** (evento recém-anunciado, sem guia de comunidade disponível ainda). Não adicionado a `KNOWN_EVENTS` nem ao Timeline Engine até termos dados de pelo menos uma ocorrência real ou um guia confiável — evitar herdar do calendário de outro evento por suposição.
+Fonte: changelog in-game compartilhado pelo jogador (2026-07-05), sem fonte externa ainda.
+
 ## Fornalha (Furnace)
 
 30 níveis. Cada nível libera prédios/mecânicas em marcos específicos (não a cada nível):
@@ -63,6 +67,28 @@ Fonte: [BlueStacks — Recurring Events Guide](https://www.bluestacks.com/blog/g
 Cada nível também eleva o **nível máximo permitido para heróis** (cap): Fornalha 17 → nível 43, Fornalha 18 → 46, Fornalha 19 → 49, Fornalha 20 → 54, Fornalha 22 → 64, Fornalha 26 → 80 (máximo do jogo). Nivelar um herói além do cap da fornalha atual não tem efeito — resolve o item 4 do BACKLOG-v1 ("nível do herói vs. cap do acampamento").
 
 Fonte: [Whiteout Survival Data — Furnace](https://whiteoutdata.com/buildings/furnace/) (tabela completa de requisitos e desbloqueios por nível, incluindo cap de herói).
+
+## Pets
+
+Desbloqueados na Fornalha 18 (Beast Cage). Raridade: Comum (N), Raro (R), Épico (SR) e Lendário (SSR) — F2P/iniciantes têm acesso a N/R/SR. Cada pet tem uma habilidade ativa (1x/dia), em duas categorias: Desenvolvimento/Crescimento (ex.: Hiena-das-cavernas +15% velocidade de construção 5min, Lobo Ártico restaura 60 stamina do Chefe, Boi Almiscarado coleta instantânea de 1 célula) e Combate (ex.: Tigre-dente-de-sabre +10% letalidade das tropas por 2h, Leão-das-cavernas +10% ataque de todas as tropas por 2h).
+
+Evolução: a cada 10 níveis o pet bate um teto de crescimento; Marcas de Avanço destravam o teto seguinte (o 1º avanço, nível 10, libera a Habilidade Ativa — o marco mais importante). Refinamento usa Marcas Selvagens para ajustar status (ataque/defesa/economia). Prioridade F2P citada pelos guias: focar Hiena-das-cavernas e Boi Almiscarado primeiro, guardando Marcas de Avanço/Selvagens para quando desbloquear Leopardo-das-neves ou Leão-das-cavernas.
+
+Nomes de pets em PT traduzidos do inglês nesta pesquisa (2026-07-05) — não confirmados contra o cliente do jogo.
+
+Fonte: [u7buy.com — Pet Guide 2026](https://www.u7buy.com/blog/whiteout-survival-pet-guide-2026-ultimate-strategy-for-taming/), [Whiteout Survival Wiki — Pets](https://www.whiteoutsurvival.wiki/pets/), [BlueStacks — Pets Tier List](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-pets-guide-en.html), [ldshop.gg — Pet Guide](https://www.ldshop.gg/blog/guide/whiteout-survival-pet-guide.html).
+
+## Aliança
+
+Cargos R1 (básico: chat, ver perfis, contribuir com tech, sair) → R2 (+ mensagem para toda aliança) → R3 (+ promover/rebaixar R1/R2) → R4 (+ promover/rebaixar até R3, expulsar, iniciar pesquisa de tecnologia, configurações da aliança) → R5/líder (controle total: sede, transferir liderança, dissolver/renomear, trocar tag).
+
+Tecnologia da aliança: só R4/R5 iniciam a pesquisa, mas qualquer membro contribui com recursos (carvão/madeira/carne/ferro) para acelerá-la — até 25 contribuições seguidas, depois 1 nova a cada 10 minutos. Tecnologias "recomendadas" (ícone verde) dão até +20% de recompensa extra na contribuição. Tokens de aliança (ganhos contribuindo) trocam por itens na Loja de Aliança (teletransportes, aceleradores, fragmentos de herói, etc.).
+
+Pedido de Ajuda: outros membros podem reduzir o tempo de fila de construção/pesquisa em andamento; o valor de redução por ajuda cresce conforme a tecnologia da aliança evolui.
+
+Critério de escolha de aliança citado pelos guias: atividade real (chat, doações, eventos coordenados) importa mais que nível/poder nominal.
+
+Fonte: [lootbar.com — Alliance Guide](https://www.lootbar.com/blog/en/whiteout-survival-alliances-guide-what-you-need-to-know.html), [ldshop.gg — Alliance Domination Guide](https://www.ldshop.gg/blog/guide/whiteout-survival-alliance-guide.html), [onechilledgamer.com — Alliance Guide](https://onechilledgamer.com/whiteout-survival-alliance-guide-becoming-a-dominant-force/), [ldcloud.net — Alliance Guide](https://www.ldcloud.net/blog/whiteout-survival-en-alliance-guide) (pesquisado em 2026-07-05).
 
 ## Pesquisa (Research Center)
 

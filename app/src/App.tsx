@@ -6,6 +6,7 @@ import { profileFromRow, profileToRow } from './lib/mappers'
 import Login from './pages/Login'
 import ProfileSetup from './pages/ProfileSetup'
 import Dashboard from './pages/Dashboard'
+import Wiki from './pages/Wiki'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -14,6 +15,7 @@ export default function App() {
   const [loadingProfile, setLoadingProfile] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
   const [editingProfile, setEditingProfile] = useState(false)
+  const [showWiki, setShowWiki] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -108,5 +110,15 @@ export default function App() {
     )
   }
 
-  return <Dashboard profile={profile} onEditProfile={() => setEditingProfile(true)} />
+  if (showWiki) {
+    return <Wiki onBack={() => setShowWiki(false)} />
+  }
+
+  return (
+    <Dashboard
+      profile={profile}
+      onEditProfile={() => setEditingProfile(true)}
+      onOpenWiki={() => setShowWiki(true)}
+    />
+  )
 }

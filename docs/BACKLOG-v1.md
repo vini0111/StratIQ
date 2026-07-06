@@ -143,3 +143,29 @@ Resposta, com base em RESEARCH-001 (já existente, não uma pesquisa nova): exis
 **Fix real, implementado nesta rodada:** os três campos "Nada disponível agora" (`constructionMaxed`, `construction2Maxed`, `researchMaxed`) — checkboxes que só aparecem no formulário quando o campo de construção/pesquisa correspondente está vazio. Quando marcado, suprime tanto a Strategy Card de fila ociosa (`IDLE_CONSTRUCTION_QUEUE`, `IDLE_CONSTRUCTION_QUEUE_2`, `IDLE_RESEARCH_QUEUE`) quanto o semáforo de crescimento (`semaphore.ts`), que antes ficava amarelo/vermelho pelo mesmo motivo. Não persiste de um check-in para o outro (o jogador declara de novo a cada vez que precisar) — decisão deliberada para evitar o risco oposto (a flag ficar "true" esquecida depois que a Fornalha sobe e novas opções aparecem, silenciando um aviso que passou a ser válido de novo).
 
 **Migração:** `0007_queue_maxed_override.sql`.
+
+## Adendo 2026-07-05 — nona rodada: análise por IA + card de promoção de tropas
+
+Usuário perguntou (a) se dava para responder com os dados atuais dúvidas concretas do check-in do dia 05 (acelerar Fornalha, gastar gemas em VIP, promover vs. treinar tropas, equipamento de herói), e (b) se fazia sentido a IA gerar uma análise em cima do campo "dúvida do dia".
+
+**Resposta à pergunta (a), por tema:**
+- Fornalha: direcional sim (Fornalha é sempre prioridade #1, já documentado), ROI exato não (isso é calculadora, terreno que decidimos não disputar na oitava rodada).
+- Gemas para VIP: sim, já resolvido pelo motor (`VIP_NEAR_LEVEL_UP` + `SAVE_GEMS_BASELINE_RESERVE` + `derived.vipProgressPct`).
+- Promover vs. treinar tropas: parcial — não temos custo exato por tier (calculadora), mas temos o suficiente para um sinal estratégico. Nova card `TROOP_PROMOTE_VS_TRAIN` (ver abaixo).
+- Equipamento de herói: não. `HeroEntry` nunca teve campo de equipamento (item 5 do BACKLOG original, sempre classificado como maior expansão de modelo pendente) — e é exatamente onde o WoS Tools tem 3 calculadoras dedicadas (Hero Gear, Chief Gear, Chief Charms), reforçando a decisão da oitava rodada de não competir nesse terreno.
+
+**Nova Strategy Card — `TROOP_PROMOTE_VS_TRAIN`:** novo campo derivado `derived.hasMultipleTroopTiers` (`strategyEngine.ts`) detecta se o jogador tem mais de um tier do mesmo tipo de tropa ao mesmo tempo (via `troopEntries`, já coletado desde a sexta rodada) — sinal de que promover o tier inferior pode ser mais barato em tempo do que treinar do zero no tier atual. Prioridade baixa, recomendação em termos gerais (o motor não conhece custos exatos por tier).
+
+**Análise por IA sob demanda — implementada:** botão "Perguntar à IA" que aparece quando a "dúvida do dia" está preenchida. Desenho arquitetural, preservando a regra de ouro do projeto ("o motor decide, a IA só explica"):
+- O **cliente** já roda `strategyEngine.ts` normalmente e monta o contexto + as Strategy Cards que dispararam — isso NÃO é recalculado no servidor, evitando duplicar/dessincronizar a lógica do motor entre cliente e Edge Function.
+- Nova Edge Function `supabase/functions/analyze-checkin` recebe esse resultado já pronto (contexto + cards) + a pergunta do jogador, monta um prompt que instrui a IA a **só explicar o que já foi calculado**, nunca inventar recomendação nova, e admitir quando a pergunta é sobre um dado que o app não rastreia (ex.: equipamento de herói) em vez de arriscar palpite.
+- Chama a API da Anthropic (`claude-haiku-4-5-20251001`) com a chave guardada como secret do Supabase (`ANTHROPIC_API_KEY`) — nunca no navegador.
+- Resposta persistida na nova tabela `ai_analyses` (pergunta + resposta + modelo + data), com RLS própria. Cliente busca a análise mais recente do check-in ao carregar (`fetchLatestAiAnalysis`) e permite perguntar de novo.
+- Custo estimado por chamada: ~US$0,004-0,012 (Haiku a ~US$1/US$5 por milhão de tokens de entrada/saída) — negligível mesmo em uso diário.
+- **Primeira Edge Function do projeto** — até aqui só usávamos Postgres/Auth do Supabase. Isso é infraestrutura nova, registrada aqui por ser uma mudança arquitetural, não só mais uma Strategy Card.
+
+**Pendências de deploy que só o usuário pode fazer** (chave de API e deploy de function não são ações que о Claude executa por conta própria):
+1. Rodar a migração `0008_ai_analyses.sql` no SQL editor do Supabase.
+2. Gerar uma chave de API em console.anthropic.com.
+3. Rodar `supabase secrets set ANTHROPIC_API_KEY=sk-ant-...` (via CLI, projeto linkado).
+4. Rodar `supabase functions deploy analyze-checkin`.

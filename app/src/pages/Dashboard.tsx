@@ -5,6 +5,7 @@ import { snapshotFromRow, snapshotToRow } from '../lib/mappers'
 import { buildContext, computeStateAgeDays, evaluateStrategyCards } from '../lib/strategyEngine'
 import { computeSemaphore } from '../lib/semaphore'
 import { strategyCards } from '../data/strategyCards'
+import { fetchLatestAiAnalysis, requestAiAnalysis, type AiAnalysisRecord } from '../lib/aiAnalysis'
 import SnapshotForm from '../components/SnapshotForm'
 import DecisionCenter from '../components/DecisionCenter'
 import HistorySparkline from '../components/HistorySparkline'
@@ -25,6 +26,9 @@ export default function Dashboard({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [savedAt, setSavedAt] = useState<string | null>(null)
+  const [aiRecord, setAiRecord] = useState<AiAnalysisRecord | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
 
   useEffect(() => {
     loadSnapshots()
@@ -84,14 +88,50 @@ export default function Dashboard({
   const latest = snapshots[snapshots.length - 1] ?? null
   const previous = snapshots.length > 1 ? snapshots[snapshots.length - 2] : null
 
-  const { semaphore, recommendations } = useMemo(() => {
-    if (!latest) return { semaphore: null, recommendations: [] }
+  const { semaphore, recommendations, derivedContext } = useMemo(() => {
+    if (!latest) return { semaphore: null, recommendations: [], derivedContext: null }
     const context = buildContext(latest, profile, previous, snapshots)
     return {
       semaphore: computeSemaphore(context),
       recommendations: evaluateStrategyCards(strategyCards, context),
+      derivedContext: context.derived,
     }
   }, [latest, previous, profile, snapshots])
+
+  // Busca a análise por IA já salva para o check-in atual (se alguém já
+  // perguntou antes) — não gera uma nova sozinho, só recupera o histórico.
+  useEffect(() => {
+    setAiRecord(null)
+    setAiError(null)
+    if (!latest?.id) return
+    fetchLatestAiAnalysis(latest.id).then(setAiRecord)
+  }, [latest?.id])
+
+  async function handleAskAi() {
+    if (!latest?.id || !latest.weeklyQuestion || !derivedContext) return
+    setAiLoading(true)
+    setAiError(null)
+    const contextSummary = {
+      furnaceLevel: latest.furnaceLevel,
+      vipLevel: latest.vipLevel,
+      gems: latest.gems,
+      power: latest.power,
+      currentBuilding: latest.currentBuilding || null,
+      currentBuilding2: latest.currentBuilding2 || null,
+      currentResearch: latest.currentResearch || null,
+      currentEvents: latest.currentEvents,
+      troopEntries: latest.troopEntries,
+      derived: derivedContext,
+    }
+    const result = await requestAiAnalysis(latest.id, latest.weeklyQuestion, contextSummary, recommendations)
+    setAiLoading(false)
+    if ('error' in result) {
+      setAiError(result.error)
+      return
+    }
+    const updated = await fetchLatestAiAnalysis(latest.id)
+    setAiRecord(updated)
+  }
 
   // Idade do estado independe de haver check-ins — só depende da data
   // informada no perfil. Calculada à parte para aparecer mesmo antes do
@@ -150,6 +190,36 @@ export default function Dashboard({
 
       {!loading && latest && semaphore && (
         <DecisionCenter semaphore={semaphore} recommendations={recommendations} />
+      )}
+
+      {!loading && latest?.weeklyQuestion && (
+        <div className="card">
+          <h3>Análise por IA</h3>
+          <p className="muted" style={{ marginBottom: 8 }}>
+            Sua dúvida do dia: "{latest.weeklyQuestion}"
+          </p>
+          {aiRecord ? (
+            <>
+              <p style={{ lineHeight: 1.5 }}>{aiRecord.answer}</p>
+              <button type="button" className="secondary" onClick={handleAskAi} disabled={aiLoading}>
+                {aiLoading ? 'Perguntando...' : 'Perguntar de novo'}
+              </button>
+            </>
+          ) : (
+            <button type="button" onClick={handleAskAi} disabled={aiLoading}>
+              {aiLoading ? 'Perguntando...' : 'Perguntar à IA'}
+            </button>
+          )}
+          {aiError && (
+            <p className="muted" style={{ color: 'var(--red)', marginTop: 8 }}>
+              {aiError}
+            </p>
+          )}
+          <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
+            A IA só explica o que as Strategy Cards acima já calcularam — ela não decide nada por
+            conta própria, e avisa quando a pergunta é sobre algo que o app ainda não rastreia.
+          </p>
+        </div>
       )}
 
       {!loading && !latest && (

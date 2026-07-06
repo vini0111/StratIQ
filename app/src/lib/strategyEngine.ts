@@ -36,6 +36,7 @@ export interface EvalContext {
     totalTroops: number
     troopCompositionPct: { infantry: number; lancer: number; marksman: number }
     troopsDelta: number | null
+    hasMultipleTroopTiers: boolean
   }
 }
 
@@ -174,6 +175,24 @@ function computeTroopComposition(
   }
 }
 
+// Detecta se o jogador tem mais de um tier do MESMO tipo de tropa ao mesmo
+// tempo (ex.: Infantaria V e Infantaria VI simultaneamente) — sinal de que
+// pode valer mais promover o tier mais baixo do que treinar tropas novas no
+// tier atual do zero (promoção custa só a diferença de tempo entre tiers;
+// treinar do zero paga o tempo cheio). Não sabemos QUAL tier é mais baixo
+// (tier é texto livre, sem ordem numérica confiável no motor), só que há
+// mais de um — a Strategy Card fala em termos gerais, não aponta o tier
+// específico. Ver docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas).
+function computeHasMultipleTroopTiers(entries: TroopEntry[]): boolean {
+  const tiersByType: Record<string, Set<string>> = {}
+  for (const entry of entries) {
+    if (!entry.tier.trim()) continue
+    if (!tiersByType[entry.type]) tiersByType[entry.type] = new Set()
+    tiersByType[entry.type].add(entry.tier.trim())
+  }
+  return Object.values(tiersByType).some((tiers) => tiers.size > 1)
+}
+
 export function computeStateAgeDays(stateFoundedDate: string | undefined, today: Date): number | null {
   if (!stateFoundedDate) return null
   const founded = new Date(stateFoundedDate)
@@ -220,6 +239,7 @@ export function buildContext(
         troopsByType.marksman
       ),
       troopsDelta: previousTotalTroops !== null ? totalTroops - previousTotalTroops : null,
+      hasMultipleTroopTiers: computeHasMultipleTroopTiers(snapshot.troopEntries ?? []),
     },
   }
 }

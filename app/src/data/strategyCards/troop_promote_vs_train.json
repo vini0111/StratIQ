@@ -1,0 +1,11 @@
+{
+  "id": "TROOP_PROMOTE_VS_TRAIN",
+  "name": "Considere promover em vez de treinar do zero",
+  "domain": "battle",
+  "priority": "low",
+  "conditions": [{ "field": "derived.hasMultipleTroopTiers", "op": "eq", "value": true }],
+  "recommendation": "Você tem mais de um tier do mesmo tipo de tropa ao mesmo tempo. Antes de treinar tropas novas no tier mais baixo, avalie promover as tropas do tier inferior para o tier mais alto que você já tem — geralmente é mais rápido.",
+  "explanation": "Promover uma tropa já treinada para o tier seguinte costuma custar só a diferença de tempo entre os dois tiers, enquanto treinar do zero no tier atual paga o tempo cheio. O motor não sabe os custos exatos de cada tier (isso é conta de calculadora, ver WoS Tools), só sinaliza que a situação de ter tiers múltiplos é onde essa escolha importa. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Tropas).",
+  "impact": "low",
+  "confidence": 0.5
+}

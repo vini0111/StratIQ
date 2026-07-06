@@ -59,6 +59,18 @@ npm run preview
 
 Conecte o repositório no Vercel, aponte o diretório raiz para `app/`, e configure as mesmas duas variáveis de ambiente (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) em Project Settings → Environment Variables.
 
+**6. (Opcional) Análise por IA — Edge Function**
+
+Habilita o botão "Perguntar à IA" no campo de dúvida do dia (ver `docs/BACKLOG-v1.md`, nona rodada). Sem isso, o resto do app funciona normalmente — é opcional.
+
+1. Instale a [Supabase CLI](https://supabase.com/docs/guides/cli) e rode `supabase login` + `supabase link` apontando para o seu projeto.
+2. Gere uma chave de API em [console.anthropic.com](https://console.anthropic.com).
+3. Registre a chave como secret: `supabase secrets set ANTHROPIC_API_KEY=sk-ant-...`
+4. Rode a migração `supabase/migrations/0008_ai_analyses.sql` no SQL Editor do Supabase (cria a tabela `ai_analyses`).
+5. Faça o deploy da function: `supabase functions deploy analyze-checkin`.
+
+Custo estimado: menos de US$0,01 por análise (modelo `claude-haiku-4-5-20251001`).
+
 ## Estrutura
 
 ```

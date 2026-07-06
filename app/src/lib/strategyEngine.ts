@@ -37,6 +37,8 @@ export interface EvalContext {
     troopCompositionPct: { infantry: number; lancer: number; marksman: number }
     troopsDelta: number | null
     hasMultipleTroopTiers: boolean
+    heroNearStarUpgradeName: string | null
+    heroNearStarUpgradePct: number
   }
 }
 
@@ -193,6 +195,38 @@ function computeHasMultipleTroopTiers(entries: TroopEntry[]): boolean {
   return Object.values(tiersByType).some((tiers) => tiers.size > 1)
 }
 
+// Progresso relativo de fragmentos para a próxima estrela, entre os heróis
+// que o jogador escolheu informar (campo opcional). Deliberadamente NÃO
+// mantemos uma tabela de "fragmentos necessários por raridade/estrela" — o
+// jogador informa os dois números direto da tela do herói no jogo (que já
+// mostra "atual/necessário"), o motor só calcula a % e aponta o mais
+// próximo de completar. Ver docs/BACKLOG-v1.md (décima quarta rodada) para a
+// decisão de não replicar a calculadora de shards de ferramentas como a
+// WoSTools — o objetivo aqui é priorização entre heróis, não custo exato.
+function computeHeroShardProgress(heroes: HeroEntry[]): {
+  heroNearStarUpgradeName: string | null
+  heroNearStarUpgradePct: number
+} {
+  let bestName: string | null = null
+  let bestPct = 0
+  for (const hero of heroes) {
+    if (hero.stars >= 5) continue // já no teto de estrela, nada a priorizar
+    if (
+      hero.shardsOwned === undefined ||
+      hero.shardsRequiredForNextStar === undefined ||
+      hero.shardsRequiredForNextStar <= 0
+    ) {
+      continue
+    }
+    const pct = Math.min(100, (hero.shardsOwned / hero.shardsRequiredForNextStar) * 100)
+    if (pct > bestPct) {
+      bestPct = pct
+      bestName = hero.name
+    }
+  }
+  return { heroNearStarUpgradeName: bestName, heroNearStarUpgradePct: bestPct }
+}
+
 export function computeStateAgeDays(stateFoundedDate: string | undefined, today: Date): number | null {
   if (!stateFoundedDate) return null
   const founded = new Date(stateFoundedDate)
@@ -240,6 +274,7 @@ export function buildContext(
       ),
       troopsDelta: previousTotalTroops !== null ? totalTroops - previousTotalTroops : null,
       hasMultipleTroopTiers: computeHasMultipleTroopTiers(snapshot.troopEntries ?? []),
+      ...computeHeroShardProgress(snapshot.heroes ?? []),
     },
   }
 }

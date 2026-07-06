@@ -42,6 +42,7 @@ import troopCompositionOverInfantry from './troop_composition_over_infantry.json
 import troopGrowthStagnation from './troop_growth_stagnation.json'
 import bearTrapMarksmanRatioLow from './bear_trap_marksman_ratio_low.json'
 import troopPromoteVsTrain from './troop_promote_vs_train.json'
+import heroShardsNearStarUpgrade from './hero_shards_near_star_upgrade.json'
 
 export const strategyCards = [
   saveGemsBaselineReserve,
@@ -80,4 +81,5 @@ export const strategyCards = [
   troopGrowthStagnation,
   bearTrapMarksmanRatioLow,
   troopPromoteVsTrain,
+  heroShardsNearStarUpgrade,
 ] as unknown as StrategyCard[]

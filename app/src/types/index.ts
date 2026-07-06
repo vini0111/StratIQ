@@ -34,6 +34,15 @@ export interface HeroEntry {
   name: string
   level: number
   stars: number
+  // Fragmentos acumulados para a próxima estrela — opcionais, só fazem
+  // sentido informar para heróis abaixo do teto (5 estrelas). Ambos os
+  // números vêm direto da tela do herói no jogo (o próprio jogo mostra
+  // "atual/necessário"), sem precisar de tabela de custo por estrela/raridade
+  // mantida pelo app — ver docs/BACKLOG-v1.md (décima quarta rodada) para a
+  // decisão de não replicar a calculadora de shards de ferramentas como a
+  // WoSTools.
+  shardsOwned?: number
+  shardsRequiredForNextStar?: number
 }
 
 export type TroopType = 'infantry' | 'lancer' | 'marksman'

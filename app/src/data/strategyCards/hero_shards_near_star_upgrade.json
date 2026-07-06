@@ -1,0 +1,11 @@
+{
+  "id": "HERO_SHARDS_NEAR_STAR_UPGRADE",
+  "name": "Herói perto de subir de estrela",
+  "domain": "heroes",
+  "priority": "high",
+  "conditions": [{ "field": "derived.heroNearStarUpgradePct", "op": "gte", "value": 80 }],
+  "recommendation": "Você está a {{derived.heroNearStarUpgradePct}}% de subir a estrela de {{derived.heroNearStarUpgradeName}}. Priorize fragmentos e recursos nesse herói antes de espalhar entre outros.",
+  "explanation": "Terminar uma estrela quase completa aproveita melhor o investimento do que espalhar fragmentos entre vários heróis ao mesmo tempo — a maior parte do custo pra fechar essa estrela já foi paga.",
+  "impact": "medium",
+  "confidence": 0.7
+}

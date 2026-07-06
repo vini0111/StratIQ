@@ -515,32 +515,65 @@ export default function SnapshotForm({
       </datalist>
 
       <label>Heróis favoritos</label>
+      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+        Fragmentos (opcional) é só para o herói que você quer priorizar agora — informe os dois
+        números que a própria tela do herói mostra ("atual" / "necessário para a próxima estrela").
+        Deixe em branco pros demais.
+      </p>
       {draft.heroes.map((hero, i) => (
-        <div className="hero-row" key={i}>
-          <input
-            type="text"
-            list="heroes-list"
-            placeholder="Nome"
-            value={hero.name}
-            onChange={(e) => updateHero(i, { name: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="Nível"
-            value={hero.level}
-            onChange={(e) => updateHero(i, { level: Number(e.target.value) })}
-          />
-          <input
-            type="number"
-            placeholder="Estrelas"
-            min={1}
-            max={5}
-            value={hero.stars}
-            onChange={(e) => updateHero(i, { stars: Number(e.target.value) })}
-          />
-          <button type="button" className="secondary" onClick={() => removeHero(i)}>
-            Remover
-          </button>
+        <div key={i} style={{ marginBottom: 10 }}>
+          <div className="hero-row">
+            <input
+              type="text"
+              list="heroes-list"
+              placeholder="Nome"
+              value={hero.name}
+              onChange={(e) => updateHero(i, { name: e.target.value })}
+            />
+            <input
+              type="number"
+              placeholder="Nível"
+              value={hero.level}
+              onChange={(e) => updateHero(i, { level: Number(e.target.value) })}
+            />
+            <input
+              type="number"
+              placeholder="Estrelas"
+              min={1}
+              max={5}
+              value={hero.stars}
+              onChange={(e) => updateHero(i, { stars: Number(e.target.value) })}
+            />
+            <button type="button" className="secondary" onClick={() => removeHero(i)}>
+              Remover
+            </button>
+          </div>
+          {hero.name.trim().length > 0 && hero.stars < 5 && (
+            <div className="grid-2" style={{ marginTop: -4 }}>
+              <input
+                type="number"
+                min={0}
+                placeholder="Fragmentos atuais (opcional)"
+                value={hero.shardsOwned ?? ''}
+                onChange={(e) =>
+                  updateHero(i, {
+                    shardsOwned: e.target.value === '' ? undefined : Number(e.target.value),
+                  })
+                }
+              />
+              <input
+                type="number"
+                min={0}
+                placeholder="Fragmentos p/ próxima estrela (opcional)"
+                value={hero.shardsRequiredForNextStar ?? ''}
+                onChange={(e) =>
+                  updateHero(i, {
+                    shardsRequiredForNextStar: e.target.value === '' ? undefined : Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+          )}
         </div>
       ))}
       {draft.heroes.length < 6 && (

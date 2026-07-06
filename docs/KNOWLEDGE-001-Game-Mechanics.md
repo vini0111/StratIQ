@@ -137,6 +137,10 @@ Destaque: **Zinman** aparece consistentemente como tier SSS/top, mas por uma hab
 
 Fonte: busca dirigida por nome em julho/2026 (BlueStacks, Theria Games, Whiteout Survival Wiki, Medium/Medieval Fun, One Chilled Gamer, gamestouse.com — ver linhas de conversa para URLs específicas por herói). Não é uma fonte única consolidada — tratar como ponto de partida, não verdade definitiva. Charlie, Eugenio, Smith e Lumak Bokan merecem confirmação in-game antes de qualquer decisão baseada neles.
 
+### Fragmentos de estrela — deliberadamente sem tabela de custo (2026-07-06)
+
+Diferente das demais seções acima, `HERO_SHARDS_NEAR_STAR_UPGRADE` (ver BACKLOG-v1, décima rodada) **não** se apoia em nenhuma tabela de custo de fragmentos por estrela/raridade mantida aqui. O jogador informa os dois números (`shardsOwned`/`shardsRequiredForNextStar`) direto da tela do herói no jogo; o motor só calcula a % relativa entre heróis. Decisão deliberada para não entrar no terreno de calculadora de recursos (ver seção "Reavaliação estratégica", BACKLOG-v1 oitava rodada) — se um dia o app precisar do custo absoluto por estrela/raridade, isso exigiria uma fonte de sourcing dedicada, ainda não levantada.
+
 ## Tropas (Battle Domain)
 
 Três tipos, ciclo de contra-ataque tipo pedra-papel-tesoura: **Infantaria vence Lanceiro → Lanceiro vence Atirador → Atirador vence Infantaria** (cada vantagem = ~10-20% de bônus de ataque/redução de dano, dependendo da fonte). Atirador é a principal fonte de dano do jogo, mas depende de Infantaria/Lanceiro para absorver dano na frente.

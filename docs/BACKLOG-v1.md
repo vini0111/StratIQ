@@ -29,10 +29,10 @@ Componente `AcceleratorInput` — três subcampos (dias/horas/minutos) convertid
 ### 4. Nível do herói vs. cap do acampamento — ✅ Implementado em 2026-07-03
 Achamos uma fonte com a tabela completa de nível máximo de herói por nível de Fornalha (ex.: Fornalha 17 → 43, Fornalha 18 → 46). Adicionado `derived.maxHeroLevel` ao motor (calculado a partir da Fornalha), novo operador `anyHeroAtOrAboveLevel`, e card `HERO_AT_LEVEL_CAP` que avisa quando um herói favorito já está no limite. Fonte em KNOWLEDGE-001 (seção Fornalha).
 
-### 5. Equipamentos, habilidades e frações de estrela (estágios de ascensão)
-Hoje heróis têm só nome/nível/estrelas (inteiro). O pedido é modelar equipamento, habilidades e o fato de que cada estrela tem 6 estágios de ascensão internos.
-**Por que não agora:** é o item de maior expansão de modelo desta lista — essencialmente o Hero Domain completo que a documentação original (pré-ADR-000) tentava modelar prematuramente. Não é um "campo a mais", é uma entidade nova inteira.
-**Esforço estimado:** alto (Knowledge Base do domínio Hero + mudança de `HeroEntry`).
+### 5. Equipamentos, habilidades e frações de estrela (estágios de ascensão) — reavaliado em 2026-07-06, ver décima rodada
+Hoje heróis têm só nome/nível/estrelas (inteiro). O pedido original era modelar equipamento, habilidades e o fato de que cada estrela tem estágios de ascensão internos (fragmentos), no mesmo nível de detalhe de calculadoras como a da WoS Tools.
+**Decisão (décima rodada):** não replicar a escada completa de ascensão (isso é calculadora de custo de fragmento, terreno já descartado desde a oitava rodada). Em vez disso, adicionado um par de campos opcionais e leves (`shardsOwned`/`shardsRequiredForNextStar`) só para sinalizar prioridade entre heróis — ver detalhes abaixo. Equipamento/habilidades continuam fora de escopo, sem mudança.
+**Esforço estimado (equipamento/habilidades, ainda pendente):** alto (Knowledge Base do domínio Hero + mudança de `HeroEntry`).
 
 ## Como isso deveria evoluir
 
@@ -165,7 +165,21 @@ Usuário perguntou (a) se dava para responder com os dados atuais dúvidas concr
 - **Primeira Edge Function do projeto** — até aqui só usávamos Postgres/Auth do Supabase. Isso é infraestrutura nova, registrada aqui por ser uma mudança arquitetural, não só mais uma Strategy Card.
 
 **Pendências de deploy que só o usuário pode fazer** (chave de API e deploy de function não são ações que о Claude executa por conta própria):
-1. Rodar a migração `0008_ai_analyses.sql` no SQL editor do Supabase.
-2. Gerar uma chave de API em console.anthropic.com.
-3. Rodar `supabase secrets set ANTHROPIC_API_KEY=sk-ant-...` (via CLI, projeto linkado).
-4. Rodar `supabase functions deploy analyze-checkin`.
+1. Rodar a migração `0008_ai_analyses.sql` no SQL editor do Supabase. — ✅ confirmado pelo usuário em 2026-07-06.
+2. Gerar uma chave de API em console.anthropic.com. — ✅ confirmado pelo usuário em 2026-07-06.
+3. Rodar `supabase secrets set ANTHROPIC_API_KEY=sk-ant-...` (via CLI, projeto linkado). — pendência ainda não confirmada; sem isso a function responde com erro explícito ("ANTHROPIC_API_KEY não configurada") em vez de falhar silenciosamente.
+4. Deploy da function `analyze-checkin` — ✅ feito em 2026-07-06 diretamente via MCP do Supabase (`deploy_edge_function`), sem precisar do CLI local. Status confirmado `ACTIVE`.
+
+**Nota 2026-07-06:** o botão "Perguntar à IA" só aparece no Dashboard quando o check-in **mais recente** tem o campo "Dúvida do dia" preenchido — se o usuário não viu o botão após o deploy, o motivo mais provável é que o último check-in salvo é anterior a essa funcionalidade (ou o campo ficou em branco), não uma falha de deploy. Logs da function (`get_logs`) confirmam zero invocações até o momento — consistente com "nunca foi acionada", não com "está com erro".
+
+## Adendo 2026-07-06 — décima rodada: priorização leve de heróis por fragmentos
+
+Usuário viu a calculadora de upgrade de estrelas da WoS Tools (interface "DE 0★-0 ATÉ 5★ Max", com sub-níveis de ascensão) e perguntou se valia a pena modelar essa granularidade para melhorar a recomendação de "investir ou não nesse herói".
+
+**Avaliação:** essa granularidade é essencialmente custo de fragmento por transição de estrela — exatamente o território de calculadora que a oitava rodada já decidiu não disputar com a WoS Tools. Replicar a escada de ascensão inteira exigiria manter uma tabela de custo por raridade/geração (fonte não trivial de sourcing confiável) e pediria ao jogador para digitar dados detalhados a cada check-in, contra o objetivo de manter o check-in leve.
+
+**Alternativa implementada:** dois campos opcionais em `HeroEntry` — `shardsOwned` e `shardsRequiredForNextStar` — preenchidos apenas se o jogador quiser sinalizar um herói específico que está priorizando (ambos os números aparecem direto na tela do herói no jogo, sem exigir nenhuma tabela de custo mantida pelo app). Só aparecem no formulário para heróis abaixo de 5 estrelas.
+
+Novo campo derivado `derived.heroNearStarUpgradeName`/`derived.heroNearStarUpgradePct` (`strategyEngine.ts`) calcula, entre os heróis com os dois campos preenchidos, qual está mais perto de completar a próxima estrela. Nova card `HERO_SHARDS_NEAR_STAR_UPGRADE` dispara quando esse progresso passa de 80%, recomendando concentrar recursos nesse herói em vez de espalhar entre vários — mesma heurística de "terminar o que já está quase completo" usada em `VIP_NEAR_LEVEL_UP`.
+
+**O que ficou de fora, deliberadamente:** custo exato de fragmentos por estrela/raridade, equipamento, habilidades — tudo isso continua no item 5 do backlog original, sem mudança de status.

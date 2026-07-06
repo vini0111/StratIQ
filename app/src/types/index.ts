@@ -63,6 +63,9 @@ export interface WeeklySnapshot {
   currentResearch: string
   currentBuilding: string
   currentBuilding2?: string
+  constructionMaxed?: boolean
+  construction2Maxed?: boolean
+  researchMaxed?: boolean
   troopEntries: TroopEntry[]
   highestTierTraining?: string
   weeklyQuestion?: string

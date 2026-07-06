@@ -33,6 +33,9 @@ const blankDraft: DraftSnapshot = {
   currentResearch: '',
   currentBuilding: '',
   currentBuilding2: '',
+  constructionMaxed: false,
+  construction2Maxed: false,
+  researchMaxed: false,
   troopEntries: [],
   highestTierTraining: '',
   weeklyQuestion: '',
@@ -436,6 +439,17 @@ export default function SnapshotForm({
             value={draft.currentBuilding}
             onChange={(e) => update('currentBuilding', e.target.value)}
           />
+          {!draft.currentBuilding && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -6, marginBottom: 12 }}>
+              <input
+                type="checkbox"
+                style={{ width: 'auto', margin: 0 }}
+                checked={draft.constructionMaxed ?? false}
+                onChange={(e) => update('constructionMaxed', e.target.checked)}
+              />
+              Nada disponível agora (ex.: esperando a Fornalha subir)
+            </label>
+          )}
         </div>
         <div>
           <label>Pesquisa atual</label>
@@ -446,6 +460,17 @@ export default function SnapshotForm({
             value={draft.currentResearch}
             onChange={(e) => update('currentResearch', e.target.value)}
           />
+          {!draft.currentResearch && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -6, marginBottom: 12 }}>
+              <input
+                type="checkbox"
+                style={{ width: 'auto', margin: 0 }}
+                checked={draft.researchMaxed ?? false}
+                onChange={(e) => update('researchMaxed', e.target.checked)}
+              />
+              Nada disponível agora
+            </label>
+          )}
         </div>
       </div>
 
@@ -459,6 +484,17 @@ export default function SnapshotForm({
             value={draft.currentBuilding2 ?? ''}
             onChange={(e) => update('currentBuilding2', e.target.value)}
           />
+          {!draft.currentBuilding2 && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -6, marginBottom: 12 }}>
+              <input
+                type="checkbox"
+                style={{ width: 'auto', margin: 0 }}
+                checked={draft.construction2Maxed ?? false}
+                onChange={(e) => update('construction2Maxed', e.target.checked)}
+              />
+              Nada disponível agora (ex.: esperando a Fornalha subir)
+            </label>
+          )}
         </>
       )}
 

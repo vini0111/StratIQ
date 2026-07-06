@@ -3,9 +3,12 @@
   "name": "Fila de construção ociosa",
   "domain": "growth",
   "priority": "very_high",
-  "conditions": [{ "field": "currentBuilding", "op": "eq", "value": "" }],
+  "conditions": [
+    { "field": "currentBuilding", "op": "eq", "value": "" },
+    { "field": "constructionMaxed", "op": "neq", "value": true }
+  ],
   "recommendation": "Sua fila de construção está vazia. Inicie uma construção ainda hoje.",
-  "explanation": "Fila parada é a forma mais comum de desperdício de progresso em jogos baseados em filas de tempo.",
+  "explanation": "Fila parada é a forma mais comum de desperdício de progresso em jogos baseados em filas de tempo. Se não há nada disponível para construir agora (ex.: esperando a Fornalha subir), marque isso no formulário para não receber este aviso à toa.",
   "impact": "high",
   "confidence": 0.95
 }

@@ -5,10 +5,11 @@
   "priority": "very_high",
   "conditions": [
     { "field": "profile.hasSecondBuilder", "op": "eq", "value": true },
-    { "field": "currentBuilding2", "op": "eq", "value": "" }
+    { "field": "currentBuilding2", "op": "eq", "value": "" },
+    { "field": "construction2Maxed", "op": "neq", "value": true }
   ],
   "recommendation": "Seu 2º construtor está ocioso. Inicie uma construção nele também.",
-  "explanation": "Com dois construtores, cada um parado é desperdício de progresso equivalente ao de ter um único construtor ocioso.",
+  "explanation": "Com dois construtores, cada um parado é desperdício de progresso equivalente ao de ter um único construtor ocioso. Se não há nada disponível para construir agora (ex.: esperando a Fornalha subir), marque isso no formulário para não receber este aviso à toa.",
   "impact": "high",
   "confidence": 0.95
 }

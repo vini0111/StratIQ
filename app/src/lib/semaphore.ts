@@ -13,13 +13,21 @@ export function computeSemaphore(context: EvalContext): SemaphoreState {
   const accelTrainingDays = context.accelTrainingDays as number
   const currentBuilding = context.currentBuilding as string
   const currentResearch = context.currentResearch as string
+  const constructionMaxed = context.constructionMaxed as boolean | undefined
+  const researchMaxed = context.researchMaxed as boolean | undefined
   const powerDelta = context.derived.powerDelta
 
   const economy: SemaphoreLevel =
     gems < reserveThreshold * 0.5 ? 'red' : gems < reserveThreshold ? 'yellow' : 'green'
 
-  const bothQueuesIdle = !currentBuilding && !currentResearch
-  const anyQueueIdle = !currentBuilding || !currentResearch
+  // Fila vazia só conta como "ociosa" se não houver nada disponível para
+  // construir/pesquisar no momento (ex.: esperando a Fornalha subir) — sem
+  // essa distinção o semáforo fica vermelho/amarelo por um motivo que o
+  // jogador não pode resolver. Ver docs/BACKLOG-v1.md (oitava rodada).
+  const constructionIdle = !currentBuilding && !constructionMaxed
+  const researchIdle = !currentResearch && !researchMaxed
+  const bothQueuesIdle = constructionIdle && researchIdle
+  const anyQueueIdle = constructionIdle || researchIdle
   const hoardingAccelerators =
     accelConstructionDays > 20 || accelResearchDays > 20 || accelTrainingDays > 20
   const growth: SemaphoreLevel = bothQueuesIdle

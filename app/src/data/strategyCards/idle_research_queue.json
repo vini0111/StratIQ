@@ -3,9 +3,12 @@
   "name": "Fila de pesquisa ociosa",
   "domain": "growth",
   "priority": "very_high",
-  "conditions": [{ "field": "currentResearch", "op": "eq", "value": "" }],
+  "conditions": [
+    { "field": "currentResearch", "op": "eq", "value": "" },
+    { "field": "researchMaxed", "op": "neq", "value": true }
+  ],
   "recommendation": "Sua fila de pesquisa está vazia. Inicie uma pesquisa ainda hoje.",
-  "explanation": "Fila parada é a forma mais comum de desperdício de progresso em jogos baseados em filas de tempo.",
+  "explanation": "Fila parada é a forma mais comum de desperdício de progresso em jogos baseados em filas de tempo. Se não há nada disponível para pesquisar agora (ex.: esperando a Fornalha subir), marque isso no formulário para não receber este aviso à toa.",
   "impact": "high",
   "confidence": 0.95
 }

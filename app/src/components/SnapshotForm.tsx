@@ -7,6 +7,7 @@ import {
   KNOWN_RESEARCH,
   KNOWN_TROOP_TIERS,
   KNOWN_TROOP_TYPES,
+  troopTierRank,
 } from '../data/knownOptions'
 import { ACCELERATOR_UNIT_LABELS, AcceleratorUnit, fromDecimalDays, toDecimalDays } from '../lib/accelerators'
 import AcceleratorInput from './AcceleratorInput'
@@ -350,13 +351,17 @@ export default function SnapshotForm({
       <label>Tropas (uma linha por tipo + tier que você tiver)</label>
       <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
         O jogo mostra por tier dentro de cada tipo (ex.: "Infantaria Heróica nível VI: 7.848"), não
-        um total único. Adicione uma linha para cada combinação que aparecer na sua tela.
+        um total único. Adicione uma linha para cada combinação que aparecer na sua tela. As linhas
+        aparecem ordenadas por tier (mais forte primeiro) — não pela ordem em que foram digitadas.
       </p>
-      {draft.troopEntries.map((entry, i) => (
-        <div className="hero-row" key={i}>
+      {draft.troopEntries
+        .map((entry, originalIndex) => ({ entry, originalIndex }))
+        .sort((a, b) => troopTierRank(b.entry.tier) - troopTierRank(a.entry.tier))
+        .map(({ entry, originalIndex }) => (
+        <div className="hero-row" key={originalIndex}>
           <select
             value={entry.type}
-            onChange={(e) => updateTroopEntry(i, { type: e.target.value as TroopEntry['type'] })}
+            onChange={(e) => updateTroopEntry(originalIndex, { type: e.target.value as TroopEntry['type'] })}
           >
             {KNOWN_TROOP_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
@@ -369,16 +374,16 @@ export default function SnapshotForm({
             list="troop-tiers-list"
             placeholder="Tier (ex.: VI - Heróica)"
             value={entry.tier}
-            onChange={(e) => updateTroopEntry(i, { tier: e.target.value })}
+            onChange={(e) => updateTroopEntry(originalIndex, { tier: e.target.value })}
           />
           <input
             type="number"
             min={0}
             placeholder="Quantidade"
             value={entry.quantity}
-            onChange={(e) => updateTroopEntry(i, { quantity: Number(e.target.value) || 0 })}
+            onChange={(e) => updateTroopEntry(originalIndex, { quantity: Number(e.target.value) || 0 })}
           />
-          <button type="button" className="secondary" onClick={() => removeTroopEntry(i)}>
+          <button type="button" className="secondary" onClick={() => removeTroopEntry(originalIndex)}>
             Remover
           </button>
         </div>

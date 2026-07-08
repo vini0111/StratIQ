@@ -201,3 +201,7 @@ Usuário encaminhou uma mensagem oficial in-game (Beast Cage/Pets) e listou cinc
 **6. Sem forma de consultar respostas anteriores da IA.** Usuário testou a análise por IA, não gostou da resposta, e pediu acesso ao histórico de conversas (não só a mais recente por check-in, que já existia). ✅ Implementado: `fetchAiAnalysisHistory(profileId)` busca todos os registros de `ai_analyses` do perfil (a policy `ai_analyses_select_own` já cobria isso, sem migração nova necessária) + seção "Ver histórico de análises por IA" no Dashboard (colapsável, carregada sob demanda) + botão excluir por registro (reaproveitando a policy `ai_analyses_delete_own`, já existente desde a migração `0008`).
 
 **Migração:** `0009_lucky_wheel_hero_and_troop_promotion.sql` (aplicada diretamente via MCP do Supabase nesta rodada, sem precisar do usuário rodar no SQL editor).
+
+## Adendo 2026-07-08 — décima sexta rodada: ordenar tropas por tier
+
+Pedido simples: linhas de tropa apareciam na ordem em que foram digitadas, então tiers novos e mais fortes (ex.: VII - Brave, recém-desbloqueado) apareciam no fim da lista em vez de primeiro. ✅ Implementado: `troopTierRank()` em `knownOptions.ts` (posição do tier em `KNOWN_TROOP_TIERS` = força relativa) + renderização das linhas em `SnapshotForm.tsx` ordenada por força decrescente, preservando os índices originais para os handlers de editar/remover. Tier ainda não reconhecido (sendo digitado, ou fora da lista) fica no fim até resolver para um valor válido — não é reordenado a cada tecla digitada. Sem mudança de schema/migração.

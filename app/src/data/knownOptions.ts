@@ -78,6 +78,17 @@ export const KNOWN_TROOP_TIERS = [
   'XII - Exalted',
 ]
 
+// Posição do tier na lista acima = força relativa (I é o mais fraco, XII o
+// mais forte). Usado para ordenar as linhas de tropa no formulário por força
+// decrescente, em vez de ordem de inserção — pedido do usuário (décima
+// sexta rodada): tropas mais fortes recém-adicionadas devem aparecer
+// primeiro, não no fim da lista. Tier não reconhecido (ainda sendo digitado,
+// ou texto livre fora da lista) retorna -1 e fica no final, até resolver
+// para um tier válido.
+export function troopTierRank(tier: string): number {
+  return KNOWN_TROOP_TIERS.indexOf(tier)
+}
+
 export const KNOWN_TROOP_TYPES: { value: 'infantry' | 'lancer' | 'marksman'; label: string }[] = [
   { value: 'infantry', label: 'Infantaria' },
   { value: 'lancer', label: 'Lanceiro' },

@@ -17,6 +17,9 @@ Conhecimento do jogo usado para calibrar as Strategy Cards (`app/src/data/strate
 
 ### Lucky Wheel
 Roda a cada 2 semanas, dura 3 dias. Um giro custa 1.500 gemas avulso, ou 13.500 gemas por 10 giros (desconto). Recompensas de marco em 5, 15, 35, 70 e 120 giros. Maximizar (120 giros) custa **159.000 gemas** por instância. Jogadores F2P costumam parar em 4 estrelas do herói (não 5) — o retorno da 5ª estrela é menor, e economizar essas gemas para VIP ou outra prioridade costuma valer mais.
+
+**Tema rotativo (confirmado pelo jogador em 2026-07-08):** cada rotação da Lucky Wheel tem um herói em destaque diferente (ex.: a rotação observada teve Zinman como tema) — o valor de "maximizar" depende de quão relevante esse herói específico é para o objetivo do jogador, não só de ter gemas suficientes. O app captura esse tema via campo opcional `luckyWheelFeaturedHero` e nomeia o herói na recomendação (`LUCKY_WHEEL_FEATURED_HERO_CONTEXT`), mas **não julga sozinho se o herói vale o investimento** — isso exigiria uma base de conhecimento por herói mais completa que a listada na seção Heróis abaixo (ver docs/BACKLOG-v1.md, item 5 e décima quinta rodada).
+
 Fonte: [Whiteout Survival Handbook — Lucky Wheel Guide 2026](https://whiteoutsurvivalhandbook.com/guides/whiteoutsurvival-lucky-wheel-guide-2026), [One Chilled Gamer](https://onechilledgamer.com/whiteout-survival-lucky-wheel-guide-how-to-max-every-hero/)
 
 ### SvS (State vs State / State of Power)
@@ -70,7 +73,9 @@ Fonte: [Whiteout Survival Data — Furnace](https://whiteoutdata.com/buildings/f
 
 ## Pets
 
-Desbloqueados na Fornalha 18 (Beast Cage). Raridade: Comum (N), Raro (R), Épico (SR) e Lendário (SSR) — F2P/iniciantes têm acesso a N/R/SR. Cada pet tem uma habilidade ativa (1x/dia), em duas categorias: Desenvolvimento/Crescimento (ex.: Hiena-das-cavernas +15% velocidade de construção 5min, Lobo Ártico restaura 60 stamina do Chefe, Boi Almiscarado coleta instantânea de 1 célula) e Combate (ex.: Tigre-dente-de-sabre +10% letalidade das tropas por 2h, Leão-das-cavernas +10% ataque de todas as tropas por 2h).
+Desbloqueados na Fornalha 18 (Beast Cage) — **porém confirmado em 2026-07-08 (jogador no Estado 4465, Fornalha acima de 18) que o nível de Fornalha sozinho não é suficiente**: mensagem oficial in-game da equipe Whiteout Survival avisou que a captura/criação de pets só ficaria disponível a partir de **2026-07-09 02:30 UTC**, como um rollout de conteúdo à parte do requisito de Fornalha. A Strategy Card `FURNACE_18_PETS_UNLOCKED` foi ajustada para exigir os dois: Fornalha >= 18 E a data de hoje >= 2026-07-09 (ver docs/BACKLOG-v1.md, décima quinta rodada). Não está confirmado se essa data de rollout é a mesma para todos os estados/servidores ou específica deste — tratar como estimativa até confirmação em outro estado.
+
+Raridade: Comum (N), Raro (R), Épico (SR) e Lendário (SSR) — F2P/iniciantes têm acesso a N/R/SR. Cada pet tem uma habilidade ativa (1x/dia), em duas categorias: Desenvolvimento/Crescimento (ex.: Hiena-das-cavernas +15% velocidade de construção 5min, Lobo Ártico restaura 60 stamina do Chefe, Boi Almiscarado coleta instantânea de 1 célula) e Combate (ex.: Tigre-dente-de-sabre +10% letalidade das tropas por 2h, Leão-das-cavernas +10% ataque de todas as tropas por 2h).
 
 Evolução: a cada 10 níveis o pet bate um teto de crescimento; Marcas de Avanço destravam o teto seguinte (o 1º avanço, nível 10, libera a Habilidade Ativa — o marco mais importante). Refinamento usa Marcas Selvagens para ajustar status (ataque/defesa/economia). Prioridade F2P citada pelos guias: focar Hiena-das-cavernas e Boi Almiscarado primeiro, guardando Marcas de Avanço/Selvagens para quando desbloquear Leopardo-das-neves ou Leão-das-cavernas.
 

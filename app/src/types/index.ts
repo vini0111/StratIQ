@@ -78,6 +78,15 @@ export interface WeeklySnapshot {
   troopEntries: TroopEntry[]
   highestTierTraining?: string
   weeklyQuestion?: string
+  // Tema da Roda da Sorte nessa rotação (opcional, texto livre) — o evento
+  // muda o herói em destaque a cada vez, e o motor não tem como saber isso
+  // sozinho. Ver docs/BACKLOG-v1.md (décima quinta rodada).
+  luckyWheelFeaturedHero?: string
+  // Override manual, mesma lógica de constructionMaxed/researchMaxed:
+  // promover tropas de um tier para outro reduz a contagem bruta total
+  // (falso positivo em TROOP_GROWTH_STAGNATION). Não persiste entre
+  // check-ins.
+  troopsPromoting?: boolean
   createdAt?: string
 }
 
@@ -95,6 +104,10 @@ export type ConditionOperator =
   | 'anyHeroBelowStars'
   | 'heroNamedBelowStars'
   | 'anyHeroAtOrAboveLevel'
+
+// gt/gte/lt/lte também aceitam duas strings — comparação lexicográfica, útil
+// para datas em formato ISO (AAAA-MM-DD), onde ordem lexicográfica = ordem
+// cronológica. Usado por derived.todayIso (ver strategyEngine.ts).
 
 export interface StrategyCondition {
   field: string

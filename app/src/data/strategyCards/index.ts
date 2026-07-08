@@ -43,6 +43,7 @@ import troopGrowthStagnation from './troop_growth_stagnation.json'
 import bearTrapMarksmanRatioLow from './bear_trap_marksman_ratio_low.json'
 import troopPromoteVsTrain from './troop_promote_vs_train.json'
 import heroShardsNearStarUpgrade from './hero_shards_near_star_upgrade.json'
+import luckyWheelFeaturedHeroContext from './lucky_wheel_featured_hero_context.json'
 
 export const strategyCards = [
   saveGemsBaselineReserve,
@@ -82,4 +83,5 @@ export const strategyCards = [
   bearTrapMarksmanRatioLow,
   troopPromoteVsTrain,
   heroShardsNearStarUpgrade,
+  luckyWheelFeaturedHeroContext,
 ] as unknown as StrategyCard[]

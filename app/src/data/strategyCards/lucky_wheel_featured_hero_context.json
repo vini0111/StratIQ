@@ -1,0 +1,14 @@
+{
+  "id": "LUCKY_WHEEL_FEATURED_HERO_CONTEXT",
+  "name": "Tema da Roda da Sorte pode não valer o investimento",
+  "domain": "economy",
+  "priority": "medium",
+  "conditions": [
+    { "field": "currentEvents", "op": "eq", "value": "Roda da Sorte" },
+    { "field": "luckyWheelFeaturedHero", "op": "neq", "value": "" }
+  ],
+  "recommendation": "Essa rotação da Roda da Sorte tem {{luckyWheelFeaturedHero}} como tema. Confirme se esse herói é relevante para o seu objetivo atual antes de decidir quanto gastar — vale mais do que só olhar o total de gemas disponível.",
+  "explanation": "A Roda da Sorte muda de herói em destaque a cada rotação, e o motor não avalia sozinho se um herói específico compensa para o seu perfil (isso exigiria uma base de conhecimento por herói que o app ainda não mantém — ver docs/BACKLOG-v1.md, item 5). Essa card só nomeia o tema para você decidir, não substitui SPEND_GEMS_LUCKY_WHEEL nem afirma se vale a pena.",
+  "impact": "medium",
+  "confidence": 0.6
+}

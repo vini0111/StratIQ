@@ -41,6 +41,27 @@ export async function fetchLatestAiAnalysis(snapshotId: string): Promise<AiAnaly
   return aiAnalysisFromRow(data)
 }
 
+// Histórico completo de perguntas/respostas do perfil (não só a mais
+// recente por check-in) — pedido explícito na décima quinta rodada de
+// feedback: poder consultar conversas anteriores com a IA, não só a última.
+// Filtra por profile_id direto (a policy ai_analyses_select_own já cobre
+// isso), sem precisar dar join com snapshots.
+export async function fetchAiAnalysisHistory(profileId: string): Promise<AiAnalysisRecord[]> {
+  const { data, error } = await supabase
+    .from('ai_analyses')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('created_at', { ascending: false })
+
+  if (error || !data) return []
+  return data.map(aiAnalysisFromRow)
+}
+
+export async function deleteAiAnalysis(id: string): Promise<boolean> {
+  const { error } = await supabase.from('ai_analyses').delete().eq('id', id)
+  return !error
+}
+
 export async function requestAiAnalysis(
   snapshotId: string,
   question: string,

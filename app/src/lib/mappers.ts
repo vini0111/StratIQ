@@ -54,6 +54,8 @@ export function snapshotFromRow(row: any): WeeklySnapshot {
     troopEntries: row.troop_entries ?? [],
     highestTierTraining: row.highest_tier_training ?? undefined,
     weeklyQuestion: row.weekly_question ?? '',
+    luckyWheelFeaturedHero: row.lucky_wheel_featured_hero ?? undefined,
+    troopsPromoting: row.troops_promoting ?? false,
     createdAt: row.created_at,
   }
 }
@@ -86,5 +88,7 @@ export function snapshotToRow(
     troop_entries: snapshot.troopEntries,
     highest_tier_training: snapshot.highestTierTraining || null,
     weekly_question: snapshot.weeklyQuestion,
+    lucky_wheel_featured_hero: snapshot.luckyWheelFeaturedHero || null,
+    troops_promoting: snapshot.troopsPromoting ?? false,
   }
 }

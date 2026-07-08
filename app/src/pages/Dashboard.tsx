@@ -5,7 +5,13 @@ import { snapshotFromRow, snapshotToRow } from '../lib/mappers'
 import { buildContext, computeStateAgeDays, evaluateStrategyCards } from '../lib/strategyEngine'
 import { computeSemaphore } from '../lib/semaphore'
 import { strategyCards } from '../data/strategyCards'
-import { fetchLatestAiAnalysis, requestAiAnalysis, type AiAnalysisRecord } from '../lib/aiAnalysis'
+import {
+  deleteAiAnalysis,
+  fetchAiAnalysisHistory,
+  fetchLatestAiAnalysis,
+  requestAiAnalysis,
+  type AiAnalysisRecord,
+} from '../lib/aiAnalysis'
 import SnapshotForm from '../components/SnapshotForm'
 import DecisionCenter from '../components/DecisionCenter'
 import HistorySparkline from '../components/HistorySparkline'
@@ -29,6 +35,8 @@ export default function Dashboard({
   const [aiRecord, setAiRecord] = useState<AiAnalysisRecord | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
+  const [aiHistory, setAiHistory] = useState<AiAnalysisRecord[]>([])
+  const [showAiHistory, setShowAiHistory] = useState(false)
 
   useEffect(() => {
     loadSnapshots()
@@ -131,6 +139,28 @@ export default function Dashboard({
     }
     const updated = await fetchLatestAiAnalysis(latest.id)
     setAiRecord(updated)
+    if (showAiHistory) {
+      setAiHistory(await fetchAiAnalysisHistory(profile.id))
+    }
+  }
+
+  // Histórico completo (todas as perguntas já feitas, não só a do check-in
+  // atual) — carregado sob demanda ao abrir, não no load inicial do
+  // Dashboard, para não gastar uma leitura extra em toda visita.
+  async function toggleAiHistory() {
+    if (!showAiHistory) {
+      setAiHistory(await fetchAiAnalysisHistory(profile.id))
+    }
+    setShowAiHistory((prev) => !prev)
+  }
+
+  async function handleDeleteAiAnalysis(id: string) {
+    if (!window.confirm('Excluir essa análise do histórico? Essa ação não pode ser desfeita.')) return
+    const ok = await deleteAiAnalysis(id)
+    if (ok) {
+      setAiHistory((prev) => prev.filter((r) => r.id !== id))
+      if (aiRecord?.id === id) setAiRecord(null)
+    }
   }
 
   // Idade do estado independe de haver check-ins — só depende da data
@@ -222,6 +252,39 @@ export default function Dashboard({
         </div>
       )}
 
+      {!loading && (
+        <div className="card">
+          <button type="button" className="secondary" onClick={toggleAiHistory}>
+            {showAiHistory ? 'Ocultar histórico de análises por IA' : 'Ver histórico de análises por IA'}
+          </button>
+          {showAiHistory && (
+            <div style={{ marginTop: 12 }}>
+              {aiHistory.length === 0 ? (
+                <p className="muted">Nenhuma pergunta feita à IA ainda.</p>
+              ) : (
+                aiHistory.map((record) => (
+                  <div className="rec-item" key={record.id}>
+                    <div className="priority">
+                      {new Date(record.createdAt).toLocaleString('pt-BR')}
+                    </div>
+                    <strong>{record.question}</strong>
+                    <div className="explanation">{record.answer}</div>
+                    <button
+                      type="button"
+                      className="secondary"
+                      style={{ marginTop: 8, padding: '2px 8px', fontSize: 12, borderColor: 'var(--red)', color: 'var(--red)' }}
+                      onClick={() => handleDeleteAiAnalysis(record.id)}
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {!loading && !latest && (
         <div className="card">
           <p className="muted">
@@ -238,6 +301,12 @@ export default function Dashboard({
           <HistorySparkline snapshots={snapshots} field="gems" label="Gemas" />
           <HistorySparkline snapshots={snapshots} field="power" label="Poder" />
           <HistorySparkline snapshots={snapshots} field="totalTroops" label="Tropas (total)" />
+          <p className="muted" style={{ fontSize: 11, marginTop: -12 }}>
+            "Tropas (total)" é contagem bruta — promover tropas para um tier mais alto reduz esse
+            número mesmo fortalecendo o exército (várias tropas de tier baixo viram menos de tier
+            alto). "Poder" já reflete o efeito líquido da promoção; é o indicador mais confiável de
+            força real.
+          </p>
         </div>
       )}
 

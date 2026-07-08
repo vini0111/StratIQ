@@ -5,10 +5,11 @@
   "priority": "high",
   "conditions": [
     { "field": "furnaceLevel", "op": "gte", "value": 18 },
-    { "field": "furnaceLevel", "op": "lt", "value": 20 }
+    { "field": "furnaceLevel", "op": "lt", "value": 20 },
+    { "field": "derived.todayIso", "op": "gte", "value": "2026-07-09" }
   ],
   "recommendation": "A Fornalha 18 libera o Beast Cage (Pets). Se ainda não desbloqueou, vale iniciar — pets dão bônus permanentes.",
-  "explanation": "Marco de desbloqueio por nível de Fornalha. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Fornalha).",
+  "explanation": "Marco de desbloqueio por nível de Fornalha, condicionado também à liberação do recurso Beast Cage em si — mensagem oficial do jogo (2026-07-08) confirmou captura de pets liberada só a partir de 2026-07-09 02:30 UTC, mesmo para contas com Fornalha já acima de 18. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Pets).",
   "impact": "medium",
   "confidence": 0.7
 }

@@ -39,6 +39,7 @@ export interface EvalContext {
     hasMultipleTroopTiers: boolean
     heroNearStarUpgradeName: string | null
     heroNearStarUpgradePct: number
+    todayIso: string
   }
 }
 
@@ -275,6 +276,11 @@ export function buildContext(
       troopsDelta: previousTotalTroops !== null ? totalTroops - previousTotalTroops : null,
       hasMultipleTroopTiers: computeHasMultipleTroopTiers(snapshot.troopEntries ?? []),
       ...computeHeroShardProgress(snapshot.heroes ?? []),
+      // Data de hoje em ISO (AAAA-MM-DD) — permite Strategy Cards com um
+      // "gate" de data (ex.: um recurso só ficou disponível a partir de tal
+      // dia, anunciado pelo próprio jogo). Ver docs/BACKLOG-v1.md (décima
+      // quinta rodada, caso do Beast Cage/Pets).
+      todayIso: new Date().toISOString().slice(0, 10),
     },
   }
 }
@@ -311,13 +317,20 @@ function evaluateOperator(op: ConditionOperator, left: unknown, right: unknown):
     case 'neq':
       if (leftIsStringArray) return !(left as string[]).includes(right as string)
       return left !== right
+    // lt/lte/gt/gte também aceitam duas strings (comparação lexicográfica) —
+    // usado para datas ISO (AAAA-MM-DD), onde ordem lexicográfica = ordem
+    // cronológica. Ver derived.todayIso.
     case 'lt':
+      if (typeof left === 'string' && typeof right === 'string') return left < right
       return typeof left === 'number' && typeof right === 'number' && left < right
     case 'lte':
+      if (typeof left === 'string' && typeof right === 'string') return left <= right
       return typeof left === 'number' && typeof right === 'number' && left <= right
     case 'gt':
+      if (typeof left === 'string' && typeof right === 'string') return left > right
       return typeof left === 'number' && typeof right === 'number' && left > right
     case 'gte':
+      if (typeof left === 'string' && typeof right === 'string') return left >= right
       return typeof left === 'number' && typeof right === 'number' && left >= right
     case 'in':
       return Array.isArray(right) && right.includes(left as never)

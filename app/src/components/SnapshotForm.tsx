@@ -39,6 +39,8 @@ const blankDraft: DraftSnapshot = {
   troopEntries: [],
   highestTierTraining: '',
   weeklyQuestion: '',
+  luckyWheelFeaturedHero: '',
+  troopsPromoting: false,
 }
 
 const emptyAcceleratorAmounts = {
@@ -278,6 +280,23 @@ export default function SnapshotForm({
         onChange={(e) => setCustomEventsText(e.target.value)}
       />
 
+      {selectedEvents.includes('Roda da Sorte') && (
+        <>
+          <label>Herói em destaque na Roda da Sorte (opcional)</label>
+          <input
+            type="text"
+            list="heroes-list"
+            placeholder="ex.: Zinman"
+            value={draft.luckyWheelFeaturedHero ?? ''}
+            onChange={(e) => update('luckyWheelFeaturedHero', e.target.value)}
+          />
+          <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
+            O tema muda a cada rotação — informar ajuda a avaliar se vale a pena maximizar os giros
+            desta vez, já que o motor sozinho não sabe se esse herói é útil para o seu objetivo.
+          </p>
+        </>
+      )}
+
       <div className="grid-2">
         <div>
           <label>Nível da Fornalha</label>
@@ -372,6 +391,21 @@ export default function SnapshotForm({
           <option key={t} value={t} />
         ))}
       </datalist>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -4, marginBottom: 12 }}>
+        <input
+          type="checkbox"
+          style={{ width: 'auto', margin: 0 }}
+          checked={draft.troopsPromoting ?? false}
+          onChange={(e) => update('troopsPromoting', e.target.checked)}
+        />
+        Estou promovendo tropas para um tier mais alto agora
+      </label>
+      <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
+        Promoção consome várias tropas de tier baixo para gerar menos tropas de tier alto — a
+        contagem total pode cair mesmo com o exército mais forte. Marque isso para não receber um
+        aviso de estagnação por engano.
+      </p>
 
       <label>Tier mais alto em treino agora</label>
       <input

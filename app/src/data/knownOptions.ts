@@ -7,8 +7,11 @@
 //
 // Nomes em português, alinhados ao que o jogo mostra (conferido contra o uso
 // real do jogador — ex.: "Mobilização da Aliança", "Rally do Herói", "Batalha
-// da Forja" — alguns nomes próprios como "Hall of Chiefs" e "Crazy Joe"
-// permanecem em inglês porque é assim que aparecem no cliente do jogo).
+// da Forja" — "Crazy Joe" permanece em inglês porque é assim que aparece no
+// cliente do jogo). "Hall of Chiefs" era listado como evento separado até a
+// décima quinta rodada de feedback — confirmado pelo jogador que é o mesmo
+// evento de "Rally do Herói" (nome interno/inglês do mesmo evento exibido em
+// PT), removido daqui para não duplicar.
 // "Frostfire" e "Confronto do Cânion" não foram confirmados contra o cliente
 // real do jogo (sem uso observado do jogador) — ajustar se o nome oficial
 // for diferente. Multi-idioma (PT/EN/ES) fica registrado como item futuro —
@@ -29,7 +32,6 @@ export const KNOWN_EVENTS = [
   'Batalha da Forja',
   'Frostfire',
   'Confronto do Cânion',
-  'Hall of Chiefs',
   'Crazy Joe',
 ] as const
 

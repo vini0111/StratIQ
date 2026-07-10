@@ -56,6 +56,11 @@ export function snapshotFromRow(row: any): WeeklySnapshot {
     weeklyQuestion: row.weekly_question ?? '',
     luckyWheelFeaturedHero: row.lucky_wheel_featured_hero ?? undefined,
     troopsPromoting: row.troops_promoting ?? false,
+    petEntries: row.pet_entries ?? [],
+    heroGearEntries: row.hero_gear_entries ?? [],
+    buildingLevels: row.building_levels ?? [],
+    allianceRank: row.alliance_rank ?? undefined,
+    allianceParticipatesAllEvents: row.alliance_participates_all_events ?? undefined,
     createdAt: row.created_at,
   }
 }
@@ -90,5 +95,10 @@ export function snapshotToRow(
     weekly_question: snapshot.weeklyQuestion,
     lucky_wheel_featured_hero: snapshot.luckyWheelFeaturedHero || null,
     troops_promoting: snapshot.troopsPromoting ?? false,
+    pet_entries: snapshot.petEntries ?? [],
+    hero_gear_entries: snapshot.heroGearEntries ?? [],
+    building_levels: snapshot.buildingLevels ?? [],
+    alliance_rank: snapshot.allianceRank ?? null,
+    alliance_participates_all_events: snapshot.allianceParticipatesAllEvents ?? null,
   }
 }

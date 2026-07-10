@@ -71,7 +71,11 @@ const VIP_XP_REQUIRED_FOR_LEVEL: Record<number, number> = {
 }
 const VIP_MAX_LEVEL = 12
 
-function computeVipProgressPct(vipLevel: number, vipXp: number): number {
+// Exportada para o gráfico de Evolução (HistorySparkline) recalcular a %
+// para cada snapshot do histórico, não só para o check-in mais recente — ver
+// docs/BACKLOG-v1.md (décima sétima rodada: trocar o gráfico de "nível VIP",
+// que muda raramente, por "progresso % no nível atual").
+export function computeVipProgressPct(vipLevel: number, vipXp: number): number {
   if (vipLevel >= VIP_MAX_LEVEL) return 100
   const requiredForNext = VIP_XP_REQUIRED_FOR_LEVEL[vipLevel + 1]
   if (!requiredForNext) return 0

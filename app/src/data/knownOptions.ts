@@ -1,3 +1,5 @@
+import type { GearRarity, GearSlot } from '../types'
+
 // Listas de conveniência para padronizar preenchimento (dropdown/sugestão),
 // não é o Knowledge Base completo do jogo (isso continua deferido — ver
 // docs/BACKLOG-v1.md item 2). Eventos são uma lista fechada (checkboxes) porque
@@ -132,4 +134,39 @@ export const KNOWN_HEROES = [
   'Ling Xue',
   'Jerónimo',
   'Zinman',
+]
+
+// Nomes de pets traduzidos do inglês nesta pesquisa (2026-07-05) — não
+// confirmados contra o cliente do jogo em PT, ajustar se divergirem do
+// texto real. Lista parcial (os pets documentados até agora em
+// KNOWLEDGE-001), não o roster completo de pets do jogo.
+export const KNOWN_PETS = [
+  'Hiena-das-cavernas',
+  'Lobo Ártico',
+  'Boi Almiscarado',
+  'Tigre-dente-de-sabre',
+  'Leão-das-cavernas',
+  'Leopardo-das-neves',
+]
+
+// Slots de equipamento de herói (Hero Gear, Fornalha 15) — 4 fixos + 1
+// exclusivo (só heróis Lendário). Fonte: BlueStacks/whiteoutsurvival.wiki
+// (pesquisado em 2026-07-09), ver KNOWLEDGE-001.
+export const KNOWN_GEAR_SLOTS: { value: GearSlot; label: string }[] = [
+  { value: 'elmo', label: 'Elmo' },
+  { value: 'manopla', label: 'Manopla' },
+  { value: 'cinto', label: 'Cinto' },
+  { value: 'bota', label: 'Bota' },
+  { value: 'exclusivo', label: 'Exclusivo (só heróis Lendário)' },
+]
+
+// Raridade do equipamento, nomenclatura confirmada pelo jogador contra o
+// cliente em PT (2026-07-09) — os guias em inglês descrevem a mesma
+// estrutura de 5 níveis por cor (Grey/Green/Blue/Purple/Gold).
+export const KNOWN_GEAR_RARITIES: { value: GearRarity; label: string }[] = [
+  { value: 'comum', label: 'Comum' },
+  { value: 'incomum', label: 'Incomum' },
+  { value: 'raro', label: 'Raro' },
+  { value: 'epico', label: 'Épico' },
+  { value: 'lendario', label: 'Lendário' },
 ]

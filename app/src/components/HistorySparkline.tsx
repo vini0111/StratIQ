@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import type { WeeklySnapshot } from '../types'
+import { computeVipProgressPct } from '../lib/strategyEngine'
 
 // Gráfico de área suave em SVG — substitui o antigo sparkline de barras
 // (pedido do usuário: "não estou gostando dos gráficos... algo visual que
@@ -34,19 +35,28 @@ export default function HistorySparkline({
   snapshots,
   field,
   label,
+  suffix = '',
 }: {
   snapshots: WeeklySnapshot[]
-  field: 'furnaceLevel' | 'vipLevel' | 'gems' | 'power' | 'totalTroops'
+  field: 'furnaceLevel' | 'vipLevel' | 'vipProgressPct' | 'gems' | 'power' | 'totalTroops'
   label: string
+  // Sufixo exibido após o número (ex.: "%" para vipProgressPct). Opcional,
+  // não afeta o cálculo, só a exibição.
+  suffix?: string
 }) {
   const gradientId = useId()
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
-  const values = snapshots.map((s) =>
-    field === 'totalTroops'
-      ? s.troopEntries.reduce((sum, t) => sum + t.quantity, 0)
-      : (s[field] as number)
-  )
+  // vipProgressPct é recalculado por snapshot (não é um campo bruto salvo) —
+  // XP de VIP reseta a cada nível, então a % dentro do nível atual é o que
+  // mostra progresso de forma legível, diferente do nível bruto (que muda
+  // raramente e fica quase sempre no mesmo patamar entre check-ins). Ver
+  // docs/BACKLOG-v1.md (décima sétima rodada).
+  const values = snapshots.map((s) => {
+    if (field === 'totalTroops') return s.troopEntries.reduce((sum, t) => sum + t.quantity, 0)
+    if (field === 'vipProgressPct') return Math.round(computeVipProgressPct(s.vipLevel, s.vipXp))
+    return s[field] as number
+  })
   const n = values.length
   const current = values[n - 1]
   const previous = n > 1 ? values[n - 2] : null
@@ -54,7 +64,9 @@ export default function HistorySparkline({
   const deltaColor =
     delta === null ? 'var(--muted)' : delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--muted)'
   const deltaText =
-    delta === null ? '' : ` (${delta > 0 ? '+' : ''}${delta.toLocaleString('pt-BR')} desde o check-in anterior)`
+    delta === null
+      ? ''
+      : ` (${delta > 0 ? '+' : ''}${delta.toLocaleString('pt-BR')}${suffix} desde o check-in anterior)`
 
   const rawMin = Math.min(...values)
   const rawMax = Math.max(...values)
@@ -83,7 +95,10 @@ export default function HistorySparkline({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <label style={{ marginBottom: 0 }}>{label}</label>
         <span style={{ fontSize: 13 }}>
-          <strong>{current.toLocaleString('pt-BR')}</strong>
+          <strong>
+            {current.toLocaleString('pt-BR')}
+            {suffix}
+          </strong>
           <span style={{ color: deltaColor }}>{deltaText}</span>
         </span>
       </div>
@@ -144,6 +159,7 @@ export default function HistorySparkline({
             }}
           >
             {formatDate(snapshots[hoverIndex].snapshotDate)}: {values[hoverIndex].toLocaleString('pt-BR')}
+            {suffix}
           </div>
         )}
       </div>

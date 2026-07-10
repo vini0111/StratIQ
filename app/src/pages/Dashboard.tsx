@@ -297,7 +297,12 @@ export default function Dashboard({
         <div className="card">
           <h3>Evolução</h3>
           <HistorySparkline snapshots={snapshots} field="furnaceLevel" label="Fornalha" />
-          <HistorySparkline snapshots={snapshots} field="vipLevel" label="VIP" />
+          <HistorySparkline
+            snapshots={snapshots}
+            field="vipProgressPct"
+            label={`VIP (nível ${snapshots[snapshots.length - 1].vipLevel} — progresso p/ o próximo)`}
+            suffix="%"
+          />
           <HistorySparkline snapshots={snapshots} field="gems" label="Gemas" />
           <HistorySparkline snapshots={snapshots} field="power" label="Poder" />
           <HistorySparkline snapshots={snapshots} field="totalTroops" label="Tropas (total)" />

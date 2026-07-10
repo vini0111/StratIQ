@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import type { HeroEntry, Profile, TroopEntry, WeeklySnapshot } from '../types'
+import type { BuildingLevelEntry, HeroEntry, HeroGearEntry, PetEntry, Profile, TroopEntry, WeeklySnapshot } from '../types'
 import {
   KNOWN_BUILDINGS,
   KNOWN_EVENTS,
+  KNOWN_GEAR_RARITIES,
+  KNOWN_GEAR_SLOTS,
   KNOWN_HEROES,
+  KNOWN_PETS,
   KNOWN_RESEARCH,
   KNOWN_TROOP_TIERS,
   KNOWN_TROOP_TYPES,
@@ -16,6 +19,9 @@ type DraftSnapshot = Omit<WeeklySnapshot, 'id' | 'profileId' | 'createdAt'>
 
 const emptyHero: HeroEntry = { name: '', level: 1, stars: 1 }
 const emptyTroopEntry: TroopEntry = { type: 'infantry', tier: '', quantity: 0 }
+const emptyPetEntry: PetEntry = { name: '', level: 1 }
+const emptyGearEntry: HeroGearEntry = { heroName: '', slot: 'elmo', rarity: 'comum', level: 0 }
+const emptyBuildingEntry: BuildingLevelEntry = { name: '', level: 1 }
 
 const blankDraft: DraftSnapshot = {
   snapshotDate: new Date().toISOString().slice(0, 10),
@@ -42,6 +48,9 @@ const blankDraft: DraftSnapshot = {
   weeklyQuestion: '',
   luckyWheelFeaturedHero: '',
   troopsPromoting: false,
+  petEntries: [],
+  heroGearEntries: [],
+  buildingLevels: [],
 }
 
 const emptyAcceleratorAmounts = {
@@ -132,6 +141,11 @@ function buildInitialDraft(last: WeeklySnapshot | null): DraftSnapshot {
     currentBuilding2: last.currentBuilding2 ?? '',
     troopEntries: last.troopEntries.map((t) => ({ ...t })),
     highestTierTraining: last.highestTierTraining ?? '',
+    petEntries: (last.petEntries ?? []).map((p) => ({ ...p })),
+    heroGearEntries: (last.heroGearEntries ?? []).map((g) => ({ ...g })),
+    buildingLevels: (last.buildingLevels ?? []).map((b) => ({ ...b })),
+    allianceRank: last.allianceRank,
+    allianceParticipatesAllEvents: last.allianceParticipatesAllEvents,
   }
 }
 
@@ -220,6 +234,57 @@ export default function SnapshotForm({
     setDraft((prev) => ({ ...prev, troopEntries: prev.troopEntries.filter((_, i) => i !== index) }))
   }
 
+  function updatePetEntry(index: number, patch: Partial<PetEntry>) {
+    setDraft((prev) => ({
+      ...prev,
+      petEntries: (prev.petEntries ?? []).map((p, i) => (i === index ? { ...p, ...patch } : p)),
+    }))
+  }
+
+  function addPetEntry() {
+    setDraft((prev) => ({ ...prev, petEntries: [...(prev.petEntries ?? []), { ...emptyPetEntry }] }))
+  }
+
+  function removePetEntry(index: number) {
+    setDraft((prev) => ({ ...prev, petEntries: (prev.petEntries ?? []).filter((_, i) => i !== index) }))
+  }
+
+  function updateGearEntry(index: number, patch: Partial<HeroGearEntry>) {
+    setDraft((prev) => ({
+      ...prev,
+      heroGearEntries: (prev.heroGearEntries ?? []).map((g, i) => (i === index ? { ...g, ...patch } : g)),
+    }))
+  }
+
+  function addGearEntry() {
+    setDraft((prev) => ({ ...prev, heroGearEntries: [...(prev.heroGearEntries ?? []), { ...emptyGearEntry }] }))
+  }
+
+  function removeGearEntry(index: number) {
+    setDraft((prev) => ({
+      ...prev,
+      heroGearEntries: (prev.heroGearEntries ?? []).filter((_, i) => i !== index),
+    }))
+  }
+
+  function updateBuildingEntry(index: number, patch: Partial<BuildingLevelEntry>) {
+    setDraft((prev) => ({
+      ...prev,
+      buildingLevels: (prev.buildingLevels ?? []).map((b, i) => (i === index ? { ...b, ...patch } : b)),
+    }))
+  }
+
+  function addBuildingEntry() {
+    setDraft((prev) => ({ ...prev, buildingLevels: [...(prev.buildingLevels ?? []), { ...emptyBuildingEntry }] }))
+  }
+
+  function removeBuildingEntry(index: number) {
+    setDraft((prev) => ({
+      ...prev,
+      buildingLevels: (prev.buildingLevels ?? []).filter((_, i) => i !== index),
+    }))
+  }
+
   return (
     <form
       className="card"
@@ -239,6 +304,9 @@ export default function SnapshotForm({
           currentEvents: [...selectedEvents, ...customEvents],
           heroes: draft.heroes.filter((h) => h.name.trim().length > 0),
           troopEntries: draft.troopEntries.filter((t) => t.tier.trim().length > 0),
+          petEntries: (draft.petEntries ?? []).filter((p) => p.name.trim().length > 0),
+          heroGearEntries: (draft.heroGearEntries ?? []).filter((g) => g.heroName.trim().length > 0),
+          buildingLevels: (draft.buildingLevels ?? []).filter((b) => b.name.trim().length > 0),
         })
         clearPersistedDraft(profile.id)
       }}
@@ -620,6 +688,153 @@ export default function SnapshotForm({
           + herói
         </button>
       )}
+
+      <label>Pets (opcional)</label>
+      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+        Captura simples de nome + nível, sem recomendação atrelada por enquanto — serve só para dar
+        visão completa da conta.
+      </p>
+      {(draft.petEntries ?? []).map((pet, i) => (
+        <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={i}>
+          <input
+            type="text"
+            list="pets-list"
+            placeholder="Nome (ex.: Hiena-das-cavernas)"
+            value={pet.name}
+            onChange={(e) => updatePetEntry(i, { name: e.target.value })}
+          />
+          <input
+            type="number"
+            min={1}
+            placeholder="Nível"
+            value={pet.level}
+            onChange={(e) => updatePetEntry(i, { level: Number(e.target.value) || 1 })}
+          />
+          <button type="button" className="secondary" onClick={() => removePetEntry(i)}>
+            Remover
+          </button>
+        </div>
+      ))}
+      <button type="button" className="secondary" onClick={addPetEntry} style={{ marginBottom: 12 }}>
+        + pet
+      </button>
+      <datalist id="pets-list">
+        {KNOWN_PETS.map((p) => (
+          <option key={p} value={p} />
+        ))}
+      </datalist>
+
+      <label>Equipamento de herói (opcional)</label>
+      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+        Uma linha por peça de equipamento que você quiser registrar (herói + slot + raridade +
+        nível). Não precisa preencher tudo de uma vez — só o que ajudar a ter visão da conta.
+      </p>
+      {(draft.heroGearEntries ?? []).map((gear, i) => (
+        <div
+          className="hero-row"
+          style={{ gridTemplateColumns: '1.5fr 1.3fr 1fr 0.7fr auto' }}
+          key={i}
+        >
+          <input
+            type="text"
+            list="heroes-list"
+            placeholder="Herói"
+            value={gear.heroName}
+            onChange={(e) => updateGearEntry(i, { heroName: e.target.value })}
+          />
+          <select
+            value={gear.slot}
+            onChange={(e) => updateGearEntry(i, { slot: e.target.value as HeroGearEntry['slot'] })}
+          >
+            {KNOWN_GEAR_SLOTS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={gear.rarity}
+            onChange={(e) => updateGearEntry(i, { rarity: e.target.value as HeroGearEntry['rarity'] })}
+          >
+            {KNOWN_GEAR_RARITIES.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            placeholder="Nível"
+            value={gear.level}
+            onChange={(e) => updateGearEntry(i, { level: Number(e.target.value) || 0 })}
+          />
+          <button type="button" className="secondary" onClick={() => removeGearEntry(i)}>
+            Remover
+          </button>
+        </div>
+      ))}
+      <button type="button" className="secondary" onClick={addGearEntry} style={{ marginBottom: 12 }}>
+        + equipamento
+      </button>
+
+      <label>Prédios da cidade (opcional)</label>
+      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+        Nível dos prédios além da Fornalha (que já tem campo próprio acima). Digite o nome como
+        aparece na sua tela — não precisa bater com a lista sugerida.
+      </p>
+      {(draft.buildingLevels ?? []).map((building, i) => (
+        <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={i}>
+          <input
+            type="text"
+            list="buildings-list"
+            placeholder="Nome (ex.: Centro de Comando)"
+            value={building.name}
+            onChange={(e) => updateBuildingEntry(i, { name: e.target.value })}
+          />
+          <input
+            type="number"
+            min={1}
+            placeholder="Nível"
+            value={building.level}
+            onChange={(e) => updateBuildingEntry(i, { level: Number(e.target.value) || 1 })}
+          />
+          <button type="button" className="secondary" onClick={() => removeBuildingEntry(i)}>
+            Remover
+          </button>
+        </div>
+      ))}
+      <button type="button" className="secondary" onClick={addBuildingEntry} style={{ marginBottom: 12 }}>
+        + prédio
+      </button>
+
+      <label>Aliança</label>
+      <div className="grid-2">
+        <div>
+          <label className="muted">Ranking da aliança no servidor (opcional)</label>
+          <input
+            type="number"
+            min={1}
+            placeholder="ex.: 6"
+            value={draft.allianceRank ?? ''}
+            onChange={(e) =>
+              update('allianceRank', e.target.value === '' ? undefined : Number(e.target.value))
+            }
+          />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 10 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 0 }}>
+            <input
+              type="checkbox"
+              style={{ width: 'auto', margin: 0 }}
+              checked={draft.allianceParticipatesAllEvents ?? false}
+              onChange={(e) => update('allianceParticipatesAllEvents', e.target.checked)}
+            />
+            Aliança participa de todos os eventos
+          </label>
+        </div>
+      </div>
 
       <label>Dúvida do dia (opcional)</label>
       <textarea

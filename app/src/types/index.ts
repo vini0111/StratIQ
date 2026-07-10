@@ -53,6 +53,47 @@ export interface TroopEntry {
   quantity: number
 }
 
+// Pets (Beast Cage, desbloqueado na Fornalha 18 + rollout de conteúdo — ver
+// docs/KNOWLEDGE-001-Game-Mechanics.md seção Pets). Modelo enxuto de
+// captura: só nome + nível, sem evolução (Marcas de Avanço/Selvagens) —
+// esse domínio começou como visão geral da conta (décima oitava rodada,
+// ver docs/BACKLOG-v1.md), sem Strategy Cards ainda; cards ficam para
+// quando houver uma regra sourced e validada com uso real.
+export interface PetEntry {
+  name: string
+  level: number
+}
+
+// Equipamento de herói (Hero Gear, desbloqueado na Fornalha 15). 4 slots
+// fixos + 1 slot exclusivo só para heróis de raridade máxima (Lendário).
+// Raridade em 5 níveis crescentes: Comum < Incomum < Raro < Épico < Lendário
+// — nomenclatura confirmada pelo jogador contra o cliente em PT (o jogo usa
+// essas palavras, não as cores usadas nos guias em inglês — Grey/Green/
+// Blue/Purple/Gold descrevem a mesma estrutura de 5 níveis). Nível é o
+// enhancement do item (0 a 100, depois disso pode ascender). Ver
+// docs/KNOWLEDGE-001-Game-Mechanics.md (seção Equipamento de Herói).
+export type GearSlot = 'elmo' | 'manopla' | 'cinto' | 'bota' | 'exclusivo'
+export type GearRarity = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario'
+
+export interface HeroGearEntry {
+  heroName: string
+  slot: GearSlot
+  rarity: GearRarity
+  level: number
+}
+
+// Nível dos prédios da cidade além da Fornalha (que já tem campo próprio,
+// furnaceLevel). Texto livre + sugestão via KNOWN_BUILDINGS (mesmo padrão de
+// currentBuilding) em vez de lista fechada — o jogador reportou nomes que
+// não batem 1:1 com KNOWN_BUILDINGS (ex.: "Quartel", "Hospital", "Campo de
+// Lanceiros/Atiradores") e ainda não confirmamos se são sinônimos dos nomes
+// já mapeados ou prédios distintos. Ver docs/KNOWLEDGE-001-Game-Mechanics.md
+// (seção Fornalha/Cidade) e docs/BACKLOG-v1.md (vigésima rodada).
+export interface BuildingLevelEntry {
+  name: string
+  level: number
+}
+
 export interface WeeklySnapshot {
   id?: string
   profileId: string
@@ -87,6 +128,24 @@ export interface WeeklySnapshot {
   // (falso positivo em TROOP_GROWTH_STAGNATION). Não persiste entre
   // check-ins.
   troopsPromoting?: boolean
+  // Pets desbloqueados (Beast Cage) — captura simples de nome + nível, sem
+  // recomendação atrelada por enquanto. Ver docs/BACKLOG-v1.md (décima
+  // oitava rodada).
+  petEntries?: PetEntry[]
+  // Equipamento de herói (opcional, por herói+slot). Ver docs/BACKLOG-v1.md
+  // (décima nona rodada).
+  heroGearEntries?: HeroGearEntry[]
+  // Nível dos prédios da cidade (fora a Fornalha). Ver docs/BACKLOG-v1.md
+  // (vigésima rodada).
+  buildingLevels?: BuildingLevelEntry[]
+  // Ranking da aliança no servidor (número que o próprio jogo mostra) e se a
+  // aliança participa de todos os eventos — captura simples, sem Strategy
+  // Card atrelada. O nome da aliança já é capturado em profile.alliance
+  // (definido uma vez no perfil, não muda a cada check-in); rank e
+  // participação variam e por isso ficam aqui. Ver docs/BACKLOG-v1.md
+  // (vigésima primeira rodada, última desta expansão de escopo).
+  allianceRank?: number
+  allianceParticipatesAllEvents?: boolean
   createdAt?: string
 }
 

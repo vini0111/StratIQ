@@ -205,3 +205,43 @@ Usuário encaminhou uma mensagem oficial in-game (Beast Cage/Pets) e listou cinc
 ## Adendo 2026-07-08 — décima sexta rodada: ordenar tropas por tier
 
 Pedido simples: linhas de tropa apareciam na ordem em que foram digitadas, então tiers novos e mais fortes (ex.: VII - Brave, recém-desbloqueado) apareciam no fim da lista em vez de primeiro. ✅ Implementado: `troopTierRank()` em `knownOptions.ts` (posição do tier em `KNOWN_TROOP_TIERS` = força relativa) + renderização das linhas em `SnapshotForm.tsx` ordenada por força decrescente, preservando os índices originais para os handlers de editar/remover. Tier ainda não reconhecido (sendo digitado, ou fora da lista) fica no fim até resolver para um valor válido — não é reordenado a cada tecla digitada. Sem mudança de schema/migração.
+
+## Adendo 2026-07-09 — décima sétima rodada: gráfico de VIP trocado para progresso no nível atual
+
+Usuário observou que o gráfico "VIP" em Evolução (nível bruto) quase não se movia entre check-ins — subir de nível VIP é lento, então a linha ficava reta a maior parte do tempo, sem transmitir progresso real.
+
+**Avaliação:** o app já calculava `derived.vipProgressPct` (progresso % dentro do nível atual, a partir do XP informado) desde a sexta rodada, só que apenas para o check-in mais recente (usado nas Strategy Cards) — nunca tinha sido recalculado por snapshot histórico para alimentar um gráfico.
+
+✅ Implementado: `computeVipProgressPct` (antes privada em `strategyEngine.ts`) exportada; `HistorySparkline.tsx` ganhou o campo `'vipProgressPct'` (recalcula a % por snapshot do histórico, não lê um valor bruto salvo) e um prop opcional `suffix` (usado para exibir "%" no valor atual, no delta e no tooltip, sem afetar o cálculo). Dashboard troca o sparkline `field="vipLevel"` por `field="vipProgressPct"`, com o rótulo mostrando o nível atual entre parênteses (ex.: "VIP (nível 9 — progresso p/ o próximo)") para não perder a informação do nível bruto. Sem mudança de schema/migração — `vipXp` já era salvo desde a sexta rodada.
+
+## Adendo 2026-07-09 — décima oitava rodada: expansão de escopo para "visão completa da conta"
+
+Usuário encaminhou um resumo detalhado do status da conta (aliança, equipamento de herói, pets, níveis de prédio da cidade) e, ao perguntar o que fazer com esses dados fora de escopo, respondeu que via valor em expandir o app para cobrir esses domínios: "entendo que ter a visão de toda a conta irá nos ajudar no futuro nas tomadas de decisão".
+
+**Decisão de escopo/ordem** (perguntada ao usuário, confirmada): um domínio por rodada, começando por Pets → equipamento de herói → prédios da cidade → aliança; e, por enquanto, só **captura de dados** (formulário + histórico + contexto para a IA), sem Strategy Cards novas — mesmo critério já usado nos domínios anteriores (card só quando há regra sourced e validada com uso real).
+
+**Pets (primeiro domínio, implementado nesta rodada):** novo tipo `PetEntry { name, level }` e campo opcional `petEntries?: PetEntry[]` em `WeeklySnapshot` — modelo enxuto, sem os marcos de evolução (Marcas de Avanço/Selvagens) documentados em KNOWLEDGE-001, que ficam fora por ora. `KNOWN_PETS` em `knownOptions.ts` com os 6 pets já documentados (sugestão via datalist, lista parcial). Seção "Pets (opcional)" no `SnapshotForm.tsx`, mesmo padrão de linhas repetíveis (add/remove) usado em tropas e heróis. Migração `0010_pet_entries.sql` (coluna `pet_entries jsonb not null default '[]'`, aplicada diretamente via MCP do Supabase). Sem Strategy Card nova.
+
+**Próximas rodadas desta expansão:** equipamento de herói (rarity + nível de enhancement por slot), prédios da cidade (níveis além da Fornalha), aliança (nome/rank/participação em eventos) — cada um em rodada própria, mesmo padrão.
+
+## Adendo 2026-07-09 — décima nona rodada: equipamento de herói (Hero Gear)
+
+Segundo domínio da expansão "visão completa da conta" (item 5 do BACKLOG original + décima oitava rodada). Pesquisa prévia confirmou (BlueStacks, whiteoutsurvival.wiki): equipamento tem 4 slots fixos (Elmo/Manopla/Cinto/Bota) + 1 slot exclusivo para heróis de raridade máxima (Lendário); raridade em 5 níveis; nível de enhancement vai de 0 a 100 (depois disso, ascensão). A nomenclatura de raridade usada no formulário (Comum/Incomum/Raro/Épico/Lendário) segue o que o próprio jogador reportou ver no cliente em PT — os guias em inglês descrevem a mesma estrutura de 5 níveis por cor (Grey/Green/Blue/Purple/Gold), tratado como equivalente.
+
+✅ Implementado: tipos `GearSlot`, `GearRarity`, `HeroGearEntry {heroName, slot, rarity, level}` e campo opcional `heroGearEntries?: HeroGearEntry[]` em `WeeklySnapshot`. `KNOWN_GEAR_SLOTS`/`KNOWN_GEAR_RARITIES` em `knownOptions.ts` (selects fechados, não texto livre — ao contrário de tier de tropa, aqui a lista é exaustiva e sourced). Seção "Equipamento de herói (opcional)" no `SnapshotForm.tsx`, mesmo padrão de linhas repetíveis. Migração `0011_hero_gear_entries.sql` (coluna `hero_gear_entries jsonb not null default '[]'`, aplicada via MCP do Supabase). Sem Strategy Card nova — mesmo critério dos domínios anteriores desta expansão.
+
+## Adendo 2026-07-09 — vigésima rodada: prédios da cidade
+
+Terceiro domínio da expansão "visão completa da conta". Diferença deste domínio: ao revisar o resumo de conta do usuário, os nomes de prédio que ele reportou ("Quartel", "Hospital", "Campo de Lanceiros", "Campo de Atiradores", "Academia") não batem literalmente com `KNOWN_BUILDINGS` (que tem "Acampamento de Infantaria", "Enfermaria", "Acampamento de Lanceiros", "Acampamento de Atiradores", "Academia de Guerra") — não está confirmado se são sinônimos informais ou prédios distintos. Em vez de arriscar mesclar/renomear errado (como foi feito com segurança no caso "Hall of Chiefs" = "Rally do Herói" na décima quinta rodada, ali com confirmação explícita do jogador), optei por **não alterar `KNOWN_BUILDINGS`** e tratar o campo como texto livre + sugestão — mesmo padrão já usado em `currentBuilding`. Fica como item aberto para confirmação futura.
+
+✅ Implementado: tipo `BuildingLevelEntry {name, level}` e campo opcional `buildingLevels?: BuildingLevelEntry[]` em `WeeklySnapshot`. Seção "Prédios da cidade (opcional)" no `SnapshotForm.tsx` (texto livre com datalist de `KNOWN_BUILDINGS`, não lista fechada). Migração `0012_building_levels.sql` (coluna `building_levels jsonb not null default '[]'`, aplicada via MCP do Supabase). Sem Strategy Card nova.
+
+**Restam desta expansão:** aliança (nome/rank/participação em eventos) — próxima e última rodada planejada.
+
+## Adendo 2026-07-09 — vigésima primeira rodada: aliança (fecha a expansão "visão completa da conta")
+
+Quarto e último domínio planejado desta expansão. Nome da aliança já existia (`profile.alliance`, definido uma vez no perfil) — o que faltava era ranking (muda com o tempo) e participação em eventos.
+
+✅ Implementado: campos opcionais `allianceRank?: number` e `allianceParticipatesAllEvents?: boolean` direto em `WeeklySnapshot` (sem lista repetível — só um valor por check-in, diferente de pets/gear/prédios). Migração `0013_alliance_fields.sql` (colunas nullable, **sem default** — ausência significa "não respondido", diferente do padrão `not null default false` usado em flags de override como `constructionMaxed`, onde `false` é um valor válido e intencional). Seção "Aliança" no `SnapshotForm.tsx`, carregando o rank/participação do check-in anterior por padrão (mesmo tratamento de campos estáveis como Fornalha/VIP). Sem Strategy Card nova.
+
+**Expansão "visão completa da conta" concluída** (rodadas 18-21): Pets, Equipamento de Herói, Prédios da Cidade, Aliança — todos como captura de dados (visibilidade + contexto para IA), nenhum ainda com Strategy Card própria. Card fica para quando surgir uma regra sourced e validada com uso real em algum desses domínios, mesmo critério usado desde a oitava rodada.

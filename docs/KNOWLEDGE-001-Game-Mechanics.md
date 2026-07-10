@@ -67,6 +67,8 @@ Fonte: changelog in-game compartilhado pelo jogador (2026-07-05), sem fonte exte
 | 25 | Chief Gear Charms |
 | 30 | Fire Crystal Upgrades (FC1+) |
 
+**Nota 2026-07-09 (vigésima rodada) — nomes de prédio possivelmente divergentes:** ao capturar níveis de prédio pedidos pelo usuário, ele reportou "Quartel", "Hospital", "Campo de Lanceiros" e "Campo de Atiradores" — nomes que não aparecem literalmente na tabela acima nem em `KNOWN_BUILDINGS` (que usa "Acampamento de Infantaria", "Enfermaria", "Acampamento de Lanceiros", "Acampamento de Atiradores"). Também usou "Academia" onde a tabela tem "Academia de Guerra" (War Academy). Não confirmado se são sinônimos informais do jogador ou nomes diferentes no cliente em PT — **não mesclado** em `KNOWN_BUILDINGS` até confirmação (diferente do caso "Hall of Chiefs"/"Rally do Herói" na décima quinta rodada, que teve confirmação explícita). O campo de nível de prédio no app aceita texto livre justamente por essa incerteza.
+
 Cada nível também eleva o **nível máximo permitido para heróis** (cap): Fornalha 17 → nível 43, Fornalha 18 → 46, Fornalha 19 → 49, Fornalha 20 → 54, Fornalha 22 → 64, Fornalha 26 → 80 (máximo do jogo). Nivelar um herói além do cap da fornalha atual não tem efeito — resolve o item 4 do BACKLOG-v1 ("nível do herói vs. cap do acampamento").
 
 Fonte: [Whiteout Survival Data — Furnace](https://whiteoutdata.com/buildings/furnace/) (tabela completa de requisitos e desbloqueios por nível, incluindo cap de herói).
@@ -81,7 +83,21 @@ Evolução: a cada 10 níveis o pet bate um teto de crescimento; Marcas de Avan�
 
 Nomes de pets em PT traduzidos do inglês nesta pesquisa (2026-07-05) — não confirmados contra o cliente do jogo.
 
+**Nota 2026-07-09 (décima oitava rodada):** o app passou a capturar pets desbloqueados (nome + nível) no check-in, como parte de uma expansão de escopo pedida pelo usuário para ter "visão completa da conta". Captura simples, sem os marcos de evolução (Marcas de Avanço/Selvagens) descritos acima — e sem Strategy Card atrelada ainda, só visibilidade/histórico e contexto para a IA.
+
 Fonte: [u7buy.com — Pet Guide 2026](https://www.u7buy.com/blog/whiteout-survival-pet-guide-2026-ultimate-strategy-for-taming/), [Whiteout Survival Wiki — Pets](https://www.whiteoutsurvival.wiki/pets/), [BlueStacks — Pets Tier List](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-pets-guide-en.html), [ldshop.gg — Pet Guide](https://www.ldshop.gg/blog/guide/whiteout-survival-pet-guide.html).
+
+## Equipamento de Herói (Hero Gear)
+
+Desbloqueado na Fornalha 15 (ver tabela de marcos na seção Fornalha). 4 slots fixos por herói — Elmo (ataque + vida), Manopla (defesa + vida), Cinto (defesa + vida), Bota (ataque + vida) — mais 1 slot exclusivo só para heróis de raridade máxima (Lendário/SSR), reservado para uma peça única daquele herói específico.
+
+Raridade em 5 níveis crescentes. Os guias em inglês descrevem por cor — Grey (mais fraca) < Green < Blue < Purple < Gold (mais forte); Grey não pode ser aprimorada. O jogador confirmou contra o cliente em PT que o jogo usa palavras, não cores: **Comum < Incomum < Raro < Épico < Lendário** — tratado como a mesma estrutura de 5 níveis, só com nomenclatura diferente.
+
+Enhancement (nível): sobe até 100; peças Douradas/Lendárias no nível 20+ desbloqueiam Mastery Forging (usa Essence Stones, dá bônus percentual em cima da força do equipamento) — requer também Fornalha 20. Depois do nível 100, o equipamento pode ascender (mecânica de servidor maduro, sem detalhe adicional pesquisado ainda).
+
+**Nota 2026-07-09 (décima nona rodada):** o app passou a capturar equipamento por herói+slot+raridade+nível no check-in, mesmo padrão de captura simples usado em Pets — parte da mesma expansão de escopo pedida pelo usuário ("visão completa da conta"). Sem Strategy Card atrelada ainda.
+
+Fonte: [BlueStacks — Hero Gear Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-gear-guide-en.html), [Whiteout Survival Wiki — Hero Gear](https://www.whiteoutsurvival.wiki/hero-gears/hero-gear/), [ldshop.gg — Hero Gear Guide](https://www.ldshop.gg/blog/guide/whiteout-survival-hero-gear-guide.html) (pesquisado em 2026-07-09; nomenclatura de raridade confirmada pelo jogador contra o cliente em PT no mesmo dia).
 
 ## Aliança
 
@@ -92,6 +108,8 @@ Tecnologia da aliança: só R4/R5 iniciam a pesquisa, mas qualquer membro contri
 Pedido de Ajuda: outros membros podem reduzir o tempo de fila de construção/pesquisa em andamento; o valor de redução por ajuda cresce conforme a tecnologia da aliança evolui.
 
 Critério de escolha de aliança citado pelos guias: atividade real (chat, doações, eventos coordenados) importa mais que nível/poder nominal.
+
+**Nota 2026-07-09 (vigésima primeira rodada, fecha a expansão "visão completa da conta"):** o app passou a capturar ranking da aliança no servidor e se ela participa de todos os eventos, ambos opcionais e sem Strategy Card atrelada. Nome da aliança já era capturado desde o perfil inicial (`profile.alliance`).
 
 Fonte: [lootbar.com — Alliance Guide](https://www.lootbar.com/blog/en/whiteout-survival-alliances-guide-what-you-need-to-know.html), [ldshop.gg — Alliance Domination Guide](https://www.ldshop.gg/blog/guide/whiteout-survival-alliance-guide.html), [onechilledgamer.com — Alliance Guide](https://onechilledgamer.com/whiteout-survival-alliance-guide-becoming-a-dominant-force/), [ldcloud.net — Alliance Guide](https://www.ldcloud.net/blog/whiteout-survival-en-alliance-guide) (pesquisado em 2026-07-05).
 
@@ -201,6 +219,8 @@ Fonte: [One Chilled Gamer — Troop Guide](https://onechilledgamer.com/whiteout-
 Soma total para chegar ao VIP 12 do zero: 4.810.000 XP (confere com fontes que citam esse total). Taxa fixa de conversão: 2 gemas = 1 XP de VIP (não muda com eventos ou nível).
 
 O app (sexta rodada, 2026-07-03) pede só o XP dentro do nível atual (`vipXp`, o número que aparece na tela do jogo) e calcula `derived.vipProgressPct` sozinho usando esta tabela (`VIP_XP_REQUIRED_FOR_LEVEL` em `strategyEngine.ts`). Antes disso o campo era uma % que o jogador tinha que estimar visualmente — informação que o jogo não expõe de forma direta.
+
+**Nota 2026-07-09 (décima sétima rodada):** o gráfico de Evolução usava o nível VIP bruto, que muda raramente e ficava visualmente estagnado entre check-ins (subir de nível é lento). Trocado para exibir `vipProgressPct` recalculado por snapshot histórico — mostra progresso real dentro do nível atual, não só quando o nível muda. `computeVipProgressPct` foi exportada de `strategyEngine.ts` para permitir esse recálculo em `HistorySparkline.tsx`.
 
 Fonte: [Whiteout Survival Data — VIP](https://whiteoutdata.com/guides/vip/) (tabela completa consultada em 2026-07-03).
 

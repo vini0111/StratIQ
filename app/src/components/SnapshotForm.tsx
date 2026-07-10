@@ -20,7 +20,6 @@ type DraftSnapshot = Omit<WeeklySnapshot, 'id' | 'profileId' | 'createdAt'>
 const emptyHero: HeroEntry = { name: '', level: 1, stars: 1 }
 const emptyTroopEntry: TroopEntry = { type: 'infantry', tier: '', quantity: 0 }
 const emptyPetEntry: PetEntry = { name: '', level: 1 }
-const emptyGearEntry: HeroGearEntry = { heroName: '', slot: 'elmo', rarity: 'comum', level: 0 }
 const emptyBuildingEntry: BuildingLevelEntry = { name: '', level: 1 }
 
 const blankDraft: DraftSnapshot = {
@@ -203,11 +202,23 @@ export default function SnapshotForm({
     )
   }
 
+  // Equipamento é indexado por nome do herói (heroGearEntries[].heroName), então
+  // renomear um herói precisa arrastar junto o equipamento já preenchido para
+  // esse herói — senão as peças ficam "órfãs" (heroName antigo, sem herói
+  // correspondente na lista) depois da fusão das seções (ver setHeroGear
+  // abaixo e docs/BACKLOG-v1.md, vigésima segunda rodada).
   function updateHero(index: number, patch: Partial<HeroEntry>) {
-    setDraft((prev) => ({
-      ...prev,
-      heroes: prev.heroes.map((h, i) => (i === index ? { ...h, ...patch } : h)),
-    }))
+    setDraft((prev) => {
+      const oldName = prev.heroes[index]?.name
+      const heroes = prev.heroes.map((h, i) => (i === index ? { ...h, ...patch } : h))
+      let heroGearEntries = prev.heroGearEntries
+      if (patch.name !== undefined && oldName && patch.name !== oldName && heroGearEntries?.length) {
+        heroGearEntries = heroGearEntries.map((g) =>
+          g.heroName === oldName ? { ...g, heroName: patch.name as string } : g
+        )
+      }
+      return { ...prev, heroes, heroGearEntries }
+    })
   }
 
   function addHero() {
@@ -249,22 +260,34 @@ export default function SnapshotForm({
     setDraft((prev) => ({ ...prev, petEntries: (prev.petEntries ?? []).filter((_, i) => i !== index) }))
   }
 
-  function updateGearEntry(index: number, patch: Partial<HeroGearEntry>) {
-    setDraft((prev) => ({
-      ...prev,
-      heroGearEntries: (prev.heroGearEntries ?? []).map((g, i) => (i === index ? { ...g, ...patch } : g)),
-    }))
+  // Vigésima segunda rodada: seção de equipamento fundida dentro de "Heróis
+  // favoritos" (pedido do usuário — preencher herói + equipamento numa
+  // passada só, em vez de duas listas separadas que exigiam digitar o nome
+  // do herói de novo e geravam entradas duplicadas/inconsistentes na
+  // prática). Upsert por (heroName, slot) em vez de índice de array solto.
+  function findGearEntry(heroName: string, slot: HeroGearEntry['slot']) {
+    return (draft.heroGearEntries ?? []).find((g) => g.heroName === heroName && g.slot === slot)
   }
 
-  function addGearEntry() {
-    setDraft((prev) => ({ ...prev, heroGearEntries: [...(prev.heroGearEntries ?? []), { ...emptyGearEntry }] }))
-  }
-
-  function removeGearEntry(index: number) {
-    setDraft((prev) => ({
-      ...prev,
-      heroGearEntries: (prev.heroGearEntries ?? []).filter((_, i) => i !== index),
-    }))
+  function setHeroGear(
+    heroName: string,
+    slot: HeroGearEntry['slot'],
+    patch: Partial<Omit<HeroGearEntry, 'heroName' | 'slot'>>
+  ) {
+    setDraft((prev) => {
+      const existing = prev.heroGearEntries ?? []
+      const idx = existing.findIndex((g) => g.heroName === heroName && g.slot === slot)
+      if (idx === -1) {
+        return {
+          ...prev,
+          heroGearEntries: [...existing, { heroName, slot, rarity: 'comum', level: 0, ...patch } as HeroGearEntry],
+        }
+      }
+      return {
+        ...prev,
+        heroGearEntries: existing.map((g, i) => (i === idx ? { ...g, ...patch } : g)),
+      }
+    })
   }
 
   function updateBuildingEntry(index: number, patch: Partial<BuildingLevelEntry>) {
@@ -625,7 +648,9 @@ export default function SnapshotForm({
       <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
         Fragmentos (opcional) é só para o herói que você quer priorizar agora — informe os dois
         números que a própria tela do herói mostra ("atual" / "necessário para a próxima estrela").
-        Deixe em branco pros demais.
+        Deixe em branco pros demais. Equipamento (opcional) também fica aqui, um herói de cada vez —
+        raridade e nível de cada peça, se você tiver essa informação. "Exclusivo" só existe para
+        heróis de raridade Lendário; deixe em branco se não for o caso.
       </p>
       {draft.heroes.map((hero, i) => (
         <div key={i} style={{ marginBottom: 10 }}>
@@ -681,6 +706,50 @@ export default function SnapshotForm({
               />
             </div>
           )}
+          {hero.name.trim().length > 0 && (
+            <div style={{ marginTop: 4 }}>
+              {KNOWN_GEAR_SLOTS.map((slotDef) => {
+                const gear = findGearEntry(hero.name, slotDef.value)
+                return (
+                  <div
+                    className="hero-row"
+                    style={{ gridTemplateColumns: '1fr 1fr 1fr', marginBottom: 4 }}
+                    key={slotDef.value}
+                  >
+                    <span className="muted" style={{ fontSize: 13, alignSelf: 'center' }}>
+                      {slotDef.label}
+                    </span>
+                    <select
+                      value={gear?.rarity ?? 'comum'}
+                      onChange={(e) =>
+                        setHeroGear(hero.name, slotDef.value, {
+                          rarity: e.target.value as HeroGearEntry['rarity'],
+                        })
+                      }
+                    >
+                      {KNOWN_GEAR_RARITIES.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      placeholder="Nível"
+                      value={gear?.level ?? ''}
+                      onChange={(e) =>
+                        setHeroGear(hero.name, slotDef.value, {
+                          level: e.target.value === '' ? 0 : Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       ))}
       {draft.heroes.length < 6 && (
@@ -724,83 +793,32 @@ export default function SnapshotForm({
         ))}
       </datalist>
 
-      <label>Equipamento de herói (opcional)</label>
-      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
-        Uma linha por peça de equipamento que você quiser registrar (herói + slot + raridade +
-        nível). Não precisa preencher tudo de uma vez — só o que ajudar a ter visão da conta.
-      </p>
-      {(draft.heroGearEntries ?? []).map((gear, i) => (
-        <div
-          className="hero-row"
-          style={{ gridTemplateColumns: '1.5fr 1.3fr 1fr 0.7fr auto' }}
-          key={i}
-        >
-          <input
-            type="text"
-            list="heroes-list"
-            placeholder="Herói"
-            value={gear.heroName}
-            onChange={(e) => updateGearEntry(i, { heroName: e.target.value })}
-          />
-          <select
-            value={gear.slot}
-            onChange={(e) => updateGearEntry(i, { slot: e.target.value as HeroGearEntry['slot'] })}
-          >
-            {KNOWN_GEAR_SLOTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={gear.rarity}
-            onChange={(e) => updateGearEntry(i, { rarity: e.target.value as HeroGearEntry['rarity'] })}
-          >
-            {KNOWN_GEAR_RARITIES.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            placeholder="Nível"
-            value={gear.level}
-            onChange={(e) => updateGearEntry(i, { level: Number(e.target.value) || 0 })}
-          />
-          <button type="button" className="secondary" onClick={() => removeGearEntry(i)}>
-            Remover
-          </button>
-        </div>
-      ))}
-      <button type="button" className="secondary" onClick={addGearEntry} style={{ marginBottom: 12 }}>
-        + equipamento
-      </button>
-
       <label>Prédios da cidade (opcional)</label>
       <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
         Nível dos prédios além da Fornalha (que já tem campo próprio acima). Digite o nome como
-        aparece na sua tela — não precisa bater com a lista sugerida.
+        aparece na sua tela — não precisa bater com a lista sugerida. Linhas ordenadas por nível
+        (maior primeiro).
       </p>
-      {(draft.buildingLevels ?? []).map((building, i) => (
-        <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={i}>
+      {(draft.buildingLevels ?? [])
+        .map((building, originalIndex) => ({ building, originalIndex }))
+        .sort((a, b) => b.building.level - a.building.level)
+        .map(({ building, originalIndex }) => (
+        <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={originalIndex}>
           <input
             type="text"
             list="buildings-list"
             placeholder="Nome (ex.: Centro de Comando)"
             value={building.name}
-            onChange={(e) => updateBuildingEntry(i, { name: e.target.value })}
+            onChange={(e) => updateBuildingEntry(originalIndex, { name: e.target.value })}
           />
           <input
             type="number"
             min={1}
             placeholder="Nível"
             value={building.level}
-            onChange={(e) => updateBuildingEntry(i, { level: Number(e.target.value) || 1 })}
+            onChange={(e) => updateBuildingEntry(originalIndex, { level: Number(e.target.value) || 1 })}
           />
-          <button type="button" className="secondary" onClick={() => removeBuildingEntry(i)}>
+          <button type="button" className="secondary" onClick={() => removeBuildingEntry(originalIndex)}>
             Remover
           </button>
         </div>

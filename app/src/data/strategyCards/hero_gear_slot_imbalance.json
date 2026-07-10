@@ -1,0 +1,13 @@
+{
+  "id": "HERO_GEAR_SLOT_IMBALANCE",
+  "name": "Equipamento desbalanceado entre slots",
+  "domain": "heroes",
+  "priority": "low",
+  "conditions": [
+    { "field": "derived.hasHeroGearImbalance", "op": "eq", "value": true }
+  ],
+  "recommendation": "{{derived.heroGearImbalanceHeroName}}: o slot {{derived.heroGearImbalanceSlotLabel}} está {{derived.heroGearImbalanceGap}} níveis atrás dos outros 3 slots base (Elmo/Manopla/Cinto/Bota). Não temos fonte confirmando se equilibrar o investimento entre slots é melhor do que concentrar num só — é só um dado para você decidir.",
+  "explanation": "Compara o nível de enhancement entre os 4 slots base do mesmo herói quando os 4 já estão preenchidos no check-in (gap mínimo de 5 níveis para disparar). Deliberadamente não recomenda uma ação nem afirma que o desbalanceamento é ruim — sem fonte sobre isso, só reporta o fato observado nos dados, seguindo a regra de não fazer julgamento não sourced. Card criada na vigésima segunda rodada a partir de dado real do check-in (Molly com 3 slots Épico nível 10 e Cinto Raro nível 5). Ver docs/BACKLOG-v1.md (vigésima segunda rodada).",
+  "impact": "low",
+  "confidence": 0.4
+}

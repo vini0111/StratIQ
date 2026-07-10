@@ -42,6 +42,9 @@ Fonte: [Whiteout Survival Wiki — Canyon Clash](https://www.whiteoutsurvival.wi
 Um dos poucos eventos **solo** do jogo. Roda a cada 2 semanas, dura ~30 minutos numa zona de combate dedicada.
 Fonte: [BlueStacks — Recurring Events Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-recurring-events-guide-en.html)
 
+### Salão dos chefes (Hall of Chiefs) — separado de Rally do Herói na vigésima terceira rodada
+Estava mesclado a "Rally do Herói" desde a décima quinta rodada (o jogador havia confirmado na época que eram o mesmo evento). Um check-in da vigésima segunda rodada mostrou os dois marcados como ativos simultaneamente, e o jogador confirmou na vigésima terceira rodada que são eventos distintos — a fusão anterior estava errada. Voltou a `KNOWN_EVENTS` como entrada própria. Mecânica ainda não pesquisada (sem guia consultado até agora) — tratar como item aberto se precisar de uma Strategy Card específica no futuro.
+
 ### Cerco de Inverno (Winter Siege) — evento novo, em observação
 Anunciado no changelog in-game de 2026-07-05 (mensagem de sistema, servidor do jogador): evento de aliança onde alianças disputam fortalezas — jogadores despacham "esquadrões de guarnição" para defender e atacam fortalezas inimigas para conquistá-las. Cadência, duração e recompensas **ainda não documentadas** (evento recém-anunciado, sem guia de comunidade disponível ainda). Não adicionado a `KNOWN_EVENTS` nem ao Timeline Engine até termos dados de pelo menos uma ocorrência real ou um guia confiável — evitar herdar do calendário de outro evento por suposição.
 Fonte: changelog in-game compartilhado pelo jogador (2026-07-05), sem fonte externa ainda.

@@ -1,0 +1,13 @@
+{
+  "id": "HERO_GEAR_MASTERY_FORGING_READY",
+  "name": "Equipamento pronto para Mastery Forging",
+  "domain": "heroes",
+  "priority": "medium",
+  "conditions": [
+    { "field": "derived.hasMasteryForgingReadyGear", "op": "eq", "value": true }
+  ],
+  "recommendation": "{{derived.masteryForgingReadyHeroName}} tem uma peça de equipamento Lendária no nível 20+, e a Fornalha já está em 20 — vale revisar o Mastery Forging (usa Essence Stones) para essa peça.",
+  "explanation": "Mastery Forging exige peça de raridade Lendária (equivalente ao \"Gold\" dos guias em inglês) no enhancement 20+ e Fornalha 20. Card criada na vigésima segunda rodada a partir do domínio de Equipamento de Herói (heroGearEntries), capturado desde a décima nona rodada. Fonte: docs/KNOWLEDGE-001-Game-Mechanics.md (seção Equipamento de Herói).",
+  "impact": "medium",
+  "confidence": 0.6
+}

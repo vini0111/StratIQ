@@ -1,6 +1,7 @@
 import type {
   ConditionOperator,
   HeroEntry,
+  HeroGearEntry,
   Profile,
   StrategyCard,
   StrategyCondition,
@@ -40,6 +41,16 @@ export interface EvalContext {
     heroNearStarUpgradeName: string | null
     heroNearStarUpgradePct: number
     todayIso: string
+    // Vigésima segunda rodada — ver docs/BACKLOG-v1.md. hasAnyPets evita que
+    // FURNACE_18_PETS_UNLOCKED continue avisando "pets disponível" depois que
+    // o jogador já registrou pelo menos um pet no check-in.
+    hasAnyPets: boolean
+    hasMasteryForgingReadyGear: boolean
+    masteryForgingReadyHeroName: string
+    hasHeroGearImbalance: boolean
+    heroGearImbalanceHeroName: string
+    heroGearImbalanceSlotLabel: string
+    heroGearImbalanceGap: number
   }
 }
 
@@ -232,6 +243,83 @@ function computeHeroShardProgress(heroes: HeroEntry[]): {
   return { heroNearStarUpgradeName: bestName, heroNearStarUpgradePct: bestPct }
 }
 
+// Equipamento de herói — dois sinais derivados do heroGearEntries capturado
+// desde a décima nona rodada (ver docs/BACKLOG-v1.md, vigésima segunda
+// rodada, quando essas derivações foram adicionadas usando dados reais do
+// check-in do jogador):
+//
+// 1) Mastery Forging pronto: peça Lendária (Gold) no enhancement 20+ e
+//    Fornalha 20+ — fato sourced (KNOWLEDGE-001, seção Equipamento de
+//    Herói), então vira Strategy Card com recomendação direta.
+// 2) Desbalanceamento entre slots: gap grande de nível entre os 4 slots base
+//    (Elmo/Manopla/Cinto/Bota) do mesmo herói. Isso é só um FATO observado
+//    nos dados — não há fonte confirmando que equilibrar investimento entre
+//    slots é mecanicamente melhor que concentrar num só, então a Strategy
+//    Card correspondente tem confiança baixa e não recomenda uma ação, só
+//    aponta o gap para o jogador decidir.
+const GEAR_SLOT_LABELS: Record<HeroGearEntry['slot'], string> = {
+  elmo: 'Elmo',
+  manopla: 'Manopla',
+  cinto: 'Cinto',
+  bota: 'Bota',
+  exclusivo: 'Exclusivo',
+}
+const BASE_GEAR_SLOTS: HeroGearEntry['slot'][] = ['elmo', 'manopla', 'cinto', 'bota']
+const HERO_GEAR_IMBALANCE_THRESHOLD = 5
+
+function computeHeroGearInsights(
+  entries: HeroGearEntry[],
+  furnaceLevel: number
+): {
+  hasMasteryForgingReadyGear: boolean
+  masteryForgingReadyHeroName: string
+  hasHeroGearImbalance: boolean
+  heroGearImbalanceHeroName: string
+  heroGearImbalanceSlotLabel: string
+  heroGearImbalanceGap: number
+} {
+  let masteryHero = ''
+  for (const g of entries) {
+    if (g.rarity === 'lendario' && g.level >= 20) {
+      masteryHero = g.heroName
+      break
+    }
+  }
+
+  const byHero: Record<string, HeroGearEntry[]> = {}
+  for (const g of entries) {
+    if (!BASE_GEAR_SLOTS.includes(g.slot)) continue
+    if (!byHero[g.heroName]) byHero[g.heroName] = []
+    byHero[g.heroName].push(g)
+  }
+
+  let imbalanceHero = ''
+  let imbalanceSlotLabel = ''
+  let imbalanceGap = 0
+  for (const [heroName, gearList] of Object.entries(byHero)) {
+    const bySlot = new Map(gearList.map((g) => [g.slot, g]))
+    if (BASE_GEAR_SLOTS.some((slot) => !bySlot.has(slot))) continue // só compara com os 4 slots base preenchidos
+    const withLevels = BASE_GEAR_SLOTS.map((slot) => bySlot.get(slot)!)
+    const maxLevel = Math.max(...withLevels.map((g) => g.level))
+    const minEntry = withLevels.reduce((a, b) => (b.level < a.level ? b : a))
+    const gap = maxLevel - minEntry.level
+    if (gap >= HERO_GEAR_IMBALANCE_THRESHOLD && gap > imbalanceGap) {
+      imbalanceGap = gap
+      imbalanceHero = heroName
+      imbalanceSlotLabel = GEAR_SLOT_LABELS[minEntry.slot]
+    }
+  }
+
+  return {
+    hasMasteryForgingReadyGear: masteryHero !== '' && furnaceLevel >= 20,
+    masteryForgingReadyHeroName: masteryHero,
+    hasHeroGearImbalance: imbalanceHero !== '',
+    heroGearImbalanceHeroName: imbalanceHero,
+    heroGearImbalanceSlotLabel: imbalanceSlotLabel,
+    heroGearImbalanceGap: imbalanceGap,
+  }
+}
+
 export function computeStateAgeDays(stateFoundedDate: string | undefined, today: Date): number | null {
   if (!stateFoundedDate) return null
   const founded = new Date(stateFoundedDate)
@@ -285,6 +373,8 @@ export function buildContext(
       // dia, anunciado pelo próprio jogo). Ver docs/BACKLOG-v1.md (décima
       // quinta rodada, caso do Beast Cage/Pets).
       todayIso: new Date().toISOString().slice(0, 10),
+      hasAnyPets: (snapshot.petEntries ?? []).length > 0,
+      ...computeHeroGearInsights(snapshot.heroGearEntries ?? [], snapshot.furnaceLevel),
     },
   }
 }

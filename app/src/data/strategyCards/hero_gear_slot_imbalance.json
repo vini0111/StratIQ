@@ -6,8 +6,8 @@
   "conditions": [
     { "field": "derived.hasHeroGearImbalance", "op": "eq", "value": true }
   ],
-  "recommendation": "{{derived.heroGearImbalanceHeroName}}: o slot {{derived.heroGearImbalanceSlotLabel}} está {{derived.heroGearImbalanceGap}} níveis atrás dos outros 3 slots base (Elmo/Manopla/Cinto/Bota). Não temos fonte confirmando se equilibrar o investimento entre slots é melhor do que concentrar num só — é só um dado para você decidir.",
-  "explanation": "Compara o nível de enhancement entre os 4 slots base do mesmo herói quando os 4 já estão preenchidos no check-in (gap mínimo de 5 níveis para disparar). Deliberadamente não recomenda uma ação nem afirma que o desbalanceamento é ruim — sem fonte sobre isso, só reporta o fato observado nos dados, seguindo a regra de não fazer julgamento não sourced. Card criada na vigésima segunda rodada a partir de dado real do check-in (Molly com 3 slots Épico nível 10 e Cinto Raro nível 5). Ver docs/BACKLOG-v1.md (vigésima segunda rodada).",
+  "recommendation": "{{derived.heroGearImbalanceHeroName}}: o slot {{derived.heroGearImbalanceSlotLabel}} está {{derived.heroGearImbalanceGap}} níveis atrás de outra(s) peça(s) da mesma raridade. Não temos fonte confirmando se equilibrar o investimento entre elas é melhor do que concentrar numa só — é só um dado para você decidir.",
+  "explanation": "Compara o nível de enhancement entre peças do mesmo herói e da MESMA raridade (gap mínimo de 5 níveis para disparar) — peças de raridades diferentes não são comparadas entre si, porque não investir mais numa peça de raridade menor costuma ser uma escolha deliberada (correção do jogador, vigésima terceira rodada; a versão original desta card comparava todos os 4 slots base sem olhar raridade, o que gerava um falso sinal). Deliberadamente não recomenda uma ação nem afirma que o desbalanceamento é ruim — sem fonte sobre isso, só reporta o fato observado nos dados. Card criada na vigésima segunda rodada, corrigida na vigésima terceira. Ver docs/BACKLOG-v1.md.",
   "impact": "low",
   "confidence": 0.4
 }

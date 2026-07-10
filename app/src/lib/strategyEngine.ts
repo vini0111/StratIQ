@@ -251,12 +251,20 @@ function computeHeroShardProgress(heroes: HeroEntry[]): {
 // 1) Mastery Forging pronto: peça Lendária (Gold) no enhancement 20+ e
 //    Fornalha 20+ — fato sourced (KNOWLEDGE-001, seção Equipamento de
 //    Herói), então vira Strategy Card com recomendação direta.
-// 2) Desbalanceamento entre slots: gap grande de nível entre os 4 slots base
-//    (Elmo/Manopla/Cinto/Bota) do mesmo herói. Isso é só um FATO observado
-//    nos dados — não há fonte confirmando que equilibrar investimento entre
-//    slots é mecanicamente melhor que concentrar num só, então a Strategy
-//    Card correspondente tem confiança baixa e não recomenda uma ação, só
-//    aponta o gap para o jogador decidir.
+// 2) Desbalanceamento entre slots: gap grande de nível de enhancement entre
+//    peças do mesmo herói — mas só faz sentido comparar peças de MESMA
+//    raridade (correção do jogador, vigésima terceira rodada: comparar
+//    nível bruto entre raridades diferentes é enganoso, porque não investir
+//    mais numa peça de raridade menor costuma ser uma escolha deliberada —
+//    não compensa evoluir o enhancement antes de subir a raridade da peça).
+//    Ex.: Molly com 3 peças Épico nível 10 e 1 peça Raro nível 5 NÃO deveria
+//    disparar a card, porque a peça Raro está numa raridade diferente das
+//    outras — só dispararia se houvesse outra peça Raro em nível bem menor.
+//    Isso continua sendo só um FATO observado nos dados — não há fonte
+//    confirmando que equilibrar investimento entre slots de mesma raridade
+//    é mecanicamente melhor que concentrar num só, então a Strategy Card
+//    correspondente tem confiança baixa e não recomenda uma ação, só aponta
+//    o gap para o jogador decidir.
 const GEAR_SLOT_LABELS: Record<HeroGearEntry['slot'], string> = {
   elmo: 'Elmo',
   manopla: 'Manopla',
@@ -297,16 +305,23 @@ function computeHeroGearInsights(
   let imbalanceSlotLabel = ''
   let imbalanceGap = 0
   for (const [heroName, gearList] of Object.entries(byHero)) {
-    const bySlot = new Map(gearList.map((g) => [g.slot, g]))
-    if (BASE_GEAR_SLOTS.some((slot) => !bySlot.has(slot))) continue // só compara com os 4 slots base preenchidos
-    const withLevels = BASE_GEAR_SLOTS.map((slot) => bySlot.get(slot)!)
-    const maxLevel = Math.max(...withLevels.map((g) => g.level))
-    const minEntry = withLevels.reduce((a, b) => (b.level < a.level ? b : a))
-    const gap = maxLevel - minEntry.level
-    if (gap >= HERO_GEAR_IMBALANCE_THRESHOLD && gap > imbalanceGap) {
-      imbalanceGap = gap
-      imbalanceHero = heroName
-      imbalanceSlotLabel = GEAR_SLOT_LABELS[minEntry.slot]
+    // Só compara nível de enhancement entre peças de MESMA raridade (ver
+    // comentário acima) — agrupa por raridade antes de procurar o gap.
+    const byRarity: Record<string, HeroGearEntry[]> = {}
+    for (const g of gearList) {
+      if (!byRarity[g.rarity]) byRarity[g.rarity] = []
+      byRarity[g.rarity].push(g)
+    }
+    for (const sameRarityGroup of Object.values(byRarity)) {
+      if (sameRarityGroup.length < 2) continue // nada para comparar dentro dessa raridade
+      const maxLevel = Math.max(...sameRarityGroup.map((g) => g.level))
+      const minEntry = sameRarityGroup.reduce((a, b) => (b.level < a.level ? b : a))
+      const gap = maxLevel - minEntry.level
+      if (gap >= HERO_GEAR_IMBALANCE_THRESHOLD && gap > imbalanceGap) {
+        imbalanceGap = gap
+        imbalanceHero = heroName
+        imbalanceSlotLabel = GEAR_SLOT_LABELS[minEntry.slot]
+      }
     }
   }
 

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import type { BuildingLevelEntry, HeroEntry, HeroGearEntry, PetEntry, Profile, TroopEntry, WeeklySnapshot } from '../types'
+import type { BuildingLevelEntry, ChiefGearEntry, HeroEntry, HeroGearEntry, PetEntry, Profile, TroopEntry, WeeklySnapshot } from '../types'
 import {
   KNOWN_BUILDINGS,
+  KNOWN_CHIEF_GEAR_SLOTS,
+  KNOWN_CHIEF_GEAR_TIERS,
   KNOWN_EVENTS,
   KNOWN_GEAR_RARITIES,
   KNOWN_GEAR_SLOTS,
@@ -21,6 +23,26 @@ const emptyHero: HeroEntry = { name: '', level: 1, stars: 1 }
 const emptyTroopEntry: TroopEntry = { type: 'infantry', tier: '', quantity: 0 }
 const emptyPetEntry: PetEntry = { name: '', level: 1 }
 const emptyBuildingEntry: BuildingLevelEntry = { name: '', level: 1 }
+const emptyChiefGearEntry: ChiefGearEntry = { slot: '', tier: '', stars: 0 }
+
+// Navegação por domínio dentro do check-in (vigésima sexta rodada — ver
+// docs/BACKLOG-v1.md), inspirada na estrutura de abas do WoStools que o
+// usuário pediu para replicar visualmente. Diferente do WoStools, isso
+// continua preenchendo UM check-in novo (snapshot no tempo, mesmo modelo de
+// sempre) — as abas só reorganizam a apresentação de um formulário que já
+// existia como rolagem única, não viram "estado" editável fora do fluxo de
+// check-in.
+const TABS: { id: string; label: string; icon: string }[] = [
+  { id: 'overview', label: 'Visão Geral', icon: '📋' },
+  { id: 'buildings', label: 'Construções', icon: '🏛️' },
+  { id: 'research', label: 'Pesquisa', icon: '🔬' },
+  { id: 'troops', label: 'Tropas', icon: '⚔️' },
+  { id: 'accelerators', label: 'Aceleradores', icon: '⏩' },
+  { id: 'heroes', label: 'Heróis', icon: '🦸' },
+  { id: 'pets', label: 'Pets', icon: '🐾' },
+  { id: 'chiefGear', label: 'Chief Gear', icon: '🛡️' },
+  { id: 'alliance', label: 'Aliança', icon: '🤝' },
+]
 
 const blankDraft: DraftSnapshot = {
   snapshotDate: new Date().toISOString().slice(0, 10),
@@ -50,6 +72,7 @@ const blankDraft: DraftSnapshot = {
   petEntries: [],
   heroGearEntries: [],
   buildingLevels: [],
+  chiefGearEntries: [],
 }
 
 const emptyAcceleratorAmounts = {
@@ -143,6 +166,7 @@ function buildInitialDraft(last: WeeklySnapshot | null): DraftSnapshot {
     petEntries: (last.petEntries ?? []).map((p) => ({ ...p })),
     heroGearEntries: (last.heroGearEntries ?? []).map((g) => ({ ...g })),
     buildingLevels: (last.buildingLevels ?? []).map((b) => ({ ...b })),
+    chiefGearEntries: (last.chiefGearEntries ?? []).map((c) => ({ ...c })),
     allianceRank: last.allianceRank,
     allianceParticipatesAllEvents: last.allianceParticipatesAllEvents,
   }
@@ -167,6 +191,7 @@ export default function SnapshotForm({
   const [acceleratorAmounts, setAcceleratorAmounts] = useState(
     () => persisted?.acceleratorAmounts ?? buildInitialAcceleratorAmounts(lastSnapshot)
   )
+  const [activeTab, setActiveTab] = useState('overview')
 
   // Salva o rascunho a cada mudança — ver comentário em PersistedDraft acima.
   useEffect(() => {
@@ -308,6 +333,24 @@ export default function SnapshotForm({
     }))
   }
 
+  function updateChiefGearEntry(index: number, patch: Partial<ChiefGearEntry>) {
+    setDraft((prev) => ({
+      ...prev,
+      chiefGearEntries: (prev.chiefGearEntries ?? []).map((c, i) => (i === index ? { ...c, ...patch } : c)),
+    }))
+  }
+
+  function addChiefGearEntry() {
+    setDraft((prev) => ({ ...prev, chiefGearEntries: [...(prev.chiefGearEntries ?? []), { ...emptyChiefGearEntry }] }))
+  }
+
+  function removeChiefGearEntry(index: number) {
+    setDraft((prev) => ({
+      ...prev,
+      chiefGearEntries: (prev.chiefGearEntries ?? []).filter((_, i) => i !== index),
+    }))
+  }
+
   return (
     <form
       className="card"
@@ -330,6 +373,7 @@ export default function SnapshotForm({
           petEntries: (draft.petEntries ?? []).filter((p) => p.name.trim().length > 0),
           heroGearEntries: (draft.heroGearEntries ?? []).filter((g) => g.heroName.trim().length > 0),
           buildingLevels: (draft.buildingLevels ?? []).filter((b) => b.name.trim().length > 0),
+          chiefGearEntries: (draft.chiefGearEntries ?? []).filter((c) => c.slot.trim().length > 0),
         })
         clearPersistedDraft(profile.id)
       }}
@@ -341,246 +385,218 @@ export default function SnapshotForm({
           : 'Menos de 2 minutos. Só o que muda a recomendação.'}
       </p>
 
-      <label>Data</label>
-      <input
-        type="date"
-        value={draft.snapshotDate}
-        onChange={(e) => update('snapshotDate', e.target.value)}
-      />
-
-      <label>Eventos ativos (pode marcar mais de um)</label>
-      <div style={{ marginBottom: 12 }}>
-        {KNOWN_EVENTS.map((ev) => (
-          <label
-            key={ev}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}
+      {/* Navegação por domínio (vigésima sexta rodada) — cada aba só
+          reorganiza a apresentação de UM check-in; o submit no rodapé
+          continua sempre visível, independente da aba ativa, porque a
+          maioria dos campos é opcional e não faz sentido forçar o jogador
+          a passar por todas as abas antes de salvar. */}
+      <div className="tab-nav">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={`tab-btn${activeTab === tab.id ? ' active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
           >
-            <input
-              type="checkbox"
-              style={{ width: 'auto', margin: 0 }}
-              checked={selectedEvents.includes(ev)}
-              onChange={() => toggleEvent(ev)}
-            />
-            {ev}
-          </label>
+            <span aria-hidden="true">{tab.icon}</span> {tab.label}
+          </button>
         ))}
       </div>
-      <label>Outros eventos (separados por vírgula, opcional)</label>
-      <input
-        type="text"
-        value={customEventsText}
-        onChange={(e) => setCustomEventsText(e.target.value)}
-      />
 
-      {selectedEvents.includes('Roda da Sorte') && (
-        <>
-          <label>Herói em destaque na Roda da Sorte (opcional)</label>
+      {activeTab === 'overview' && (
+        <div>
+          <label>Data</label>
+          <input
+            type="date"
+            value={draft.snapshotDate}
+            onChange={(e) => update('snapshotDate', e.target.value)}
+          />
+
+          <label>Eventos ativos (pode marcar mais de um)</label>
+          <div style={{ marginBottom: 12 }}>
+            {KNOWN_EVENTS.map((ev) => (
+              <label
+                key={ev}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}
+              >
+                <input
+                  type="checkbox"
+                  style={{ width: 'auto', margin: 0 }}
+                  checked={selectedEvents.includes(ev)}
+                  onChange={() => toggleEvent(ev)}
+                />
+                {ev}
+              </label>
+            ))}
+          </div>
+          <label>Outros eventos (separados por vírgula, opcional)</label>
           <input
             type="text"
-            list="heroes-list"
-            placeholder="ex.: Zinman"
-            value={draft.luckyWheelFeaturedHero ?? ''}
-            onChange={(e) => update('luckyWheelFeaturedHero', e.target.value)}
+            value={customEventsText}
+            onChange={(e) => setCustomEventsText(e.target.value)}
           />
+
+          {selectedEvents.includes('Roda da Sorte') && (
+            <>
+              <label>Herói em destaque na Roda da Sorte (opcional)</label>
+              <input
+                type="text"
+                list="heroes-list"
+                placeholder="ex.: Zinman"
+                value={draft.luckyWheelFeaturedHero ?? ''}
+                onChange={(e) => update('luckyWheelFeaturedHero', e.target.value)}
+              />
+              <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
+                O tema muda a cada rotação — informar ajuda a avaliar se vale a pena maximizar os
+                giros desta vez, já que o motor sozinho não sabe se esse herói é útil para o seu
+                objetivo.
+              </p>
+            </>
+          )}
+
+          <div className="grid-2">
+            <div>
+              <label>Nível da Fornalha</label>
+              <input
+                type="number"
+                value={draft.furnaceLevel}
+                onChange={(e) => update('furnaceLevel', Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label>Nível VIP</label>
+              <input
+                type="number"
+                value={draft.vipLevel}
+                onChange={(e) => update('vipLevel', Number(e.target.value))}
+              />
+            </div>
+          </div>
+
+          <div className="grid-2">
+            <div>
+              <label>XP de VIP (progresso no nível atual)</label>
+              <input
+                type="number"
+                min={0}
+                value={draft.vipXp}
+                onChange={(e) => update('vipXp', Number(e.target.value) || 0)}
+              />
+            </div>
+            <div>
+              <label>Gemas</label>
+              <input
+                type="number"
+                value={draft.gems}
+                onChange={(e) => update('gems', Number(e.target.value))}
+              />
+            </div>
+          </div>
           <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
-            O tema muda a cada rotação — informar ajuda a avaliar se vale a pena maximizar os giros
-            desta vez, já que o motor sozinho não sabe se esse herói é útil para o seu objetivo.
+            O número que aparece na tela de VIP do jogo, tipo "X / Y para o próximo nível" —
+            informe só o X. O app calcula a % sozinho a partir da tabela de XP necessário por
+            nível.
           </p>
-        </>
+
+          <label>Poder</label>
+          <input
+            type="number"
+            value={draft.power}
+            onChange={(e) => update('power', Number(e.target.value))}
+          />
+        </div>
       )}
 
-      <div className="grid-2">
+      {activeTab === 'buildings' && (
         <div>
-          <label>Nível da Fornalha</label>
-          <input
-            type="number"
-            value={draft.furnaceLevel}
-            onChange={(e) => update('furnaceLevel', Number(e.target.value))}
-          />
-        </div>
-        <div>
-          <label>Nível VIP</label>
-          <input
-            type="number"
-            value={draft.vipLevel}
-            onChange={(e) => update('vipLevel', Number(e.target.value))}
-          />
-        </div>
-      </div>
+          <div className="grid-2">
+            <div>
+              <label>Construção atual {profile.hasSecondBuilder ? '(1º construtor)' : ''}</label>
+              <input
+                type="text"
+                list="buildings-list"
+                placeholder="Vazio = fila ociosa"
+                value={draft.currentBuilding}
+                onChange={(e) => update('currentBuilding', e.target.value)}
+              />
+              {!draft.currentBuilding && (
+                <label
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -6, marginBottom: 12 }}
+                >
+                  <input
+                    type="checkbox"
+                    style={{ width: 'auto', margin: 0 }}
+                    checked={draft.constructionMaxed ?? false}
+                    onChange={(e) => update('constructionMaxed', e.target.checked)}
+                  />
+                  Nada disponível agora (ex.: esperando a Fornalha subir)
+                </label>
+              )}
+            </div>
+            {profile.hasSecondBuilder && (
+              <div>
+                <label>Construção atual (2º construtor)</label>
+                <input
+                  type="text"
+                  list="buildings-list"
+                  placeholder="Vazio = fila ociosa"
+                  value={draft.currentBuilding2 ?? ''}
+                  onChange={(e) => update('currentBuilding2', e.target.value)}
+                />
+                {!draft.currentBuilding2 && (
+                  <label
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -6, marginBottom: 12 }}
+                  >
+                    <input
+                      type="checkbox"
+                      style={{ width: 'auto', margin: 0 }}
+                      checked={draft.construction2Maxed ?? false}
+                      onChange={(e) => update('construction2Maxed', e.target.checked)}
+                    />
+                    Nada disponível agora
+                  </label>
+                )}
+              </div>
+            )}
+          </div>
 
-      <div className="grid-2">
-        <div>
-          <label>XP de VIP (progresso no nível atual)</label>
-          <input
-            type="number"
-            min={0}
-            value={draft.vipXp}
-            onChange={(e) => update('vipXp', Number(e.target.value) || 0)}
-          />
-        </div>
-        <div>
-          <label>Gemas</label>
-          <input
-            type="number"
-            value={draft.gems}
-            onChange={(e) => update('gems', Number(e.target.value))}
-          />
-        </div>
-      </div>
-      <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
-        O número que aparece na tela de VIP do jogo, tipo "X / Y para o próximo nível" — informe só
-        o X. O app calcula a % sozinho a partir da tabela de XP necessário por nível.
-      </p>
-
-      <label>Poder</label>
-      <input
-        type="number"
-        value={draft.power}
-        onChange={(e) => update('power', Number(e.target.value))}
-      />
-
-      <label>Tropas (uma linha por tipo + tier que você tiver)</label>
-      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
-        O jogo mostra por tier dentro de cada tipo (ex.: "Infantaria Heróica nível VI: 7.848"), não
-        um total único. Adicione uma linha para cada combinação que aparecer na sua tela. As linhas
-        aparecem ordenadas por tier (mais forte primeiro) — não pela ordem em que foram digitadas.
-      </p>
-      {draft.troopEntries
-        .map((entry, originalIndex) => ({ entry, originalIndex }))
-        .sort((a, b) => troopTierRank(b.entry.tier) - troopTierRank(a.entry.tier))
-        .map(({ entry, originalIndex }) => (
-        <div className="hero-row" key={originalIndex}>
-          <select
-            value={entry.type}
-            onChange={(e) => updateTroopEntry(originalIndex, { type: e.target.value as TroopEntry['type'] })}
-          >
-            {KNOWN_TROOP_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            list="troop-tiers-list"
-            placeholder="Tier (ex.: VI - Heróica)"
-            value={entry.tier}
-            onChange={(e) => updateTroopEntry(originalIndex, { tier: e.target.value })}
-          />
-          <input
-            type="number"
-            min={0}
-            placeholder="Quantidade"
-            value={entry.quantity}
-            onChange={(e) => updateTroopEntry(originalIndex, { quantity: Number(e.target.value) || 0 })}
-          />
-          <button type="button" className="secondary" onClick={() => removeTroopEntry(originalIndex)}>
-            Remover
+          <label>Prédios da cidade (opcional)</label>
+          <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+            Nível dos prédios além da Fornalha (que já tem campo próprio em Visão Geral). Digite o
+            nome como aparece na sua tela — não precisa bater com a lista sugerida. Linhas
+            ordenadas por nível (maior primeiro).
+          </p>
+          {(draft.buildingLevels ?? [])
+            .map((building, originalIndex) => ({ building, originalIndex }))
+            .sort((a, b) => b.building.level - a.building.level)
+            .map(({ building, originalIndex }) => (
+            <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={originalIndex}>
+              <input
+                type="text"
+                list="buildings-list"
+                placeholder="Nome (ex.: Centro de Comando)"
+                value={building.name}
+                onChange={(e) => updateBuildingEntry(originalIndex, { name: e.target.value })}
+              />
+              <input
+                type="number"
+                min={1}
+                placeholder="Nível"
+                value={building.level}
+                onChange={(e) => updateBuildingEntry(originalIndex, { level: Number(e.target.value) || 1 })}
+              />
+              <button type="button" className="secondary" onClick={() => removeBuildingEntry(originalIndex)}>
+                Remover
+              </button>
+            </div>
+          ))}
+          <button type="button" className="secondary" onClick={addBuildingEntry} style={{ marginBottom: 12 }}>
+            + prédio
           </button>
         </div>
-      ))}
-      <button type="button" className="secondary" onClick={addTroopEntry} style={{ marginBottom: 12 }}>
-        + linha de tropa
-      </button>
-      <datalist id="troop-tiers-list">
-        {KNOWN_TROOP_TIERS.map((t) => (
-          <option key={t} value={t} />
-        ))}
-      </datalist>
+      )}
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -4, marginBottom: 12 }}>
-        <input
-          type="checkbox"
-          style={{ width: 'auto', margin: 0 }}
-          checked={draft.troopsPromoting ?? false}
-          onChange={(e) => update('troopsPromoting', e.target.checked)}
-        />
-        Estou promovendo tropas para um tier mais alto agora
-      </label>
-      <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
-        Promoção consome várias tropas de tier baixo para gerar menos tropas de tier alto — a
-        contagem total pode cair mesmo com o exército mais forte. Marque isso para não receber um
-        aviso de estagnação por engano.
-      </p>
-
-      <label>Tier mais alto em treino agora</label>
-      <input
-        type="text"
-        list="troop-tiers-list"
-        placeholder="ex.: VII - Brave"
-        value={draft.highestTierTraining ?? ''}
-        onChange={(e) => update('highestTierTraining', e.target.value)}
-      />
-
-      <label>Aceleradores disponíveis agora</label>
-      <div style={{ marginBottom: 8 }}>
-        <label className="muted">Unidade (vale para todos abaixo)</label>
-        <select
-          value={acceleratorUnit}
-          onChange={(e) => changeAcceleratorUnit(e.target.value as AcceleratorUnit)}
-        >
-          {(Object.keys(ACCELERATOR_UNIT_LABELS) as AcceleratorUnit[]).map((u) => (
-            <option key={u} value={u}>
-              {ACCELERATOR_UNIT_LABELS[u]}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="grid-2">
-        <AcceleratorInput
-          label="Aceleração Geral"
-          value={acceleratorAmounts.general}
-          onChange={(v) => updateAccelerator('general', v)}
-        />
-        <AcceleratorInput
-          label="Treinamento de tropas"
-          value={acceleratorAmounts.training}
-          onChange={(v) => updateAccelerator('training', v)}
-        />
-      </div>
-      <div className="grid-2">
-        <AcceleratorInput
-          label="Construção"
-          value={acceleratorAmounts.construction}
-          onChange={(v) => updateAccelerator('construction', v)}
-        />
-        <AcceleratorInput
-          label="Pesquisa"
-          value={acceleratorAmounts.research}
-          onChange={(v) => updateAccelerator('research', v)}
-        />
-      </div>
-      <div className="grid-2">
-        <AcceleratorInput
-          label="Cura"
-          value={acceleratorAmounts.healing}
-          onChange={(v) => updateAccelerator('healing', v)}
-        />
-        <div />
-      </div>
-
-      <div className="grid-2">
-        <div>
-          <label>Construção atual {profile.hasSecondBuilder ? '(1º construtor)' : ''}</label>
-          <input
-            type="text"
-            list="buildings-list"
-            placeholder="Vazio = fila ociosa"
-            value={draft.currentBuilding}
-            onChange={(e) => update('currentBuilding', e.target.value)}
-          />
-          {!draft.currentBuilding && (
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -6, marginBottom: 12 }}>
-              <input
-                type="checkbox"
-                style={{ width: 'auto', margin: 0 }}
-                checked={draft.constructionMaxed ?? false}
-                onChange={(e) => update('constructionMaxed', e.target.checked)}
-              />
-              Nada disponível agora (ex.: esperando a Fornalha subir)
-            </label>
-          )}
-        </div>
+      {activeTab === 'research' && (
         <div>
           <label>Pesquisa atual</label>
           <input
@@ -602,32 +618,364 @@ export default function SnapshotForm({
             </label>
           )}
         </div>
-      </div>
-
-      {profile.hasSecondBuilder && (
-        <>
-          <label>Construção atual (2º construtor)</label>
-          <input
-            type="text"
-            list="buildings-list"
-            placeholder="Vazio = fila ociosa"
-            value={draft.currentBuilding2 ?? ''}
-            onChange={(e) => update('currentBuilding2', e.target.value)}
-          />
-          {!draft.currentBuilding2 && (
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -6, marginBottom: 12 }}>
-              <input
-                type="checkbox"
-                style={{ width: 'auto', margin: 0 }}
-                checked={draft.construction2Maxed ?? false}
-                onChange={(e) => update('construction2Maxed', e.target.checked)}
-              />
-              Nada disponível agora (ex.: esperando a Fornalha subir)
-            </label>
-          )}
-        </>
       )}
 
+      {activeTab === 'troops' && (
+        <div>
+          <label>Tropas (uma linha por tipo + tier que você tiver)</label>
+          <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+            O jogo mostra por tier dentro de cada tipo (ex.: "Infantaria Heróica nível VI: 7.848"),
+            não um total único. Adicione uma linha para cada combinação que aparecer na sua tela.
+            As linhas aparecem ordenadas por tier (mais forte primeiro) — não pela ordem em que
+            foram digitadas.
+          </p>
+          {draft.troopEntries
+            .map((entry, originalIndex) => ({ entry, originalIndex }))
+            .sort((a, b) => troopTierRank(b.entry.tier) - troopTierRank(a.entry.tier))
+            .map(({ entry, originalIndex }) => (
+            <div className="hero-row" key={originalIndex}>
+              <select
+                value={entry.type}
+                onChange={(e) => updateTroopEntry(originalIndex, { type: e.target.value as TroopEntry['type'] })}
+              >
+                {KNOWN_TROOP_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                list="troop-tiers-list"
+                placeholder="Tier (ex.: VI - Heróica)"
+                value={entry.tier}
+                onChange={(e) => updateTroopEntry(originalIndex, { tier: e.target.value })}
+              />
+              <input
+                type="number"
+                min={0}
+                placeholder="Quantidade"
+                value={entry.quantity}
+                onChange={(e) => updateTroopEntry(originalIndex, { quantity: Number(e.target.value) || 0 })}
+              />
+              <button type="button" className="secondary" onClick={() => removeTroopEntry(originalIndex)}>
+                Remover
+              </button>
+            </div>
+          ))}
+          <button type="button" className="secondary" onClick={addTroopEntry} style={{ marginBottom: 12 }}>
+            + linha de tropa
+          </button>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -4, marginBottom: 12 }}>
+            <input
+              type="checkbox"
+              style={{ width: 'auto', margin: 0 }}
+              checked={draft.troopsPromoting ?? false}
+              onChange={(e) => update('troopsPromoting', e.target.checked)}
+            />
+            Estou promovendo tropas para um tier mais alto agora
+          </label>
+          <p className="muted" style={{ marginTop: -8, fontSize: 12 }}>
+            Promoção consome várias tropas de tier baixo para gerar menos tropas de tier alto — a
+            contagem total pode cair mesmo com o exército mais forte. Marque isso para não receber
+            um aviso de estagnação por engano.
+          </p>
+
+          <label>Tier mais alto em treino agora</label>
+          <input
+            type="text"
+            list="troop-tiers-list"
+            placeholder="ex.: VII - Brave"
+            value={draft.highestTierTraining ?? ''}
+            onChange={(e) => update('highestTierTraining', e.target.value)}
+          />
+        </div>
+      )}
+
+      {activeTab === 'accelerators' && (
+        <div>
+          <label>Aceleradores disponíveis agora</label>
+          <div style={{ marginBottom: 8 }}>
+            <label className="muted">Unidade (vale para todos abaixo)</label>
+            <select
+              value={acceleratorUnit}
+              onChange={(e) => changeAcceleratorUnit(e.target.value as AcceleratorUnit)}
+            >
+              {(Object.keys(ACCELERATOR_UNIT_LABELS) as AcceleratorUnit[]).map((u) => (
+                <option key={u} value={u}>
+                  {ACCELERATOR_UNIT_LABELS[u]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid-2">
+            <AcceleratorInput
+              label="Aceleração Geral"
+              value={acceleratorAmounts.general}
+              onChange={(v) => updateAccelerator('general', v)}
+            />
+            <AcceleratorInput
+              label="Treinamento de tropas"
+              value={acceleratorAmounts.training}
+              onChange={(v) => updateAccelerator('training', v)}
+            />
+          </div>
+          <div className="grid-2">
+            <AcceleratorInput
+              label="Construção"
+              value={acceleratorAmounts.construction}
+              onChange={(v) => updateAccelerator('construction', v)}
+            />
+            <AcceleratorInput
+              label="Pesquisa"
+              value={acceleratorAmounts.research}
+              onChange={(v) => updateAccelerator('research', v)}
+            />
+          </div>
+          <div className="grid-2">
+            <AcceleratorInput
+              label="Cura"
+              value={acceleratorAmounts.healing}
+              onChange={(v) => updateAccelerator('healing', v)}
+            />
+            <div />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'heroes' && (
+        <div>
+          <label>Heróis favoritos</label>
+          <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+            Fragmentos (opcional) é só para o herói que você quer priorizar agora — informe os
+            dois números que a própria tela do herói mostra ("atual" / "necessário para a próxima
+            estrela"). Deixe em branco pros demais. Equipamento (opcional) também fica aqui, um
+            herói de cada vez — raridade e nível de cada peça, se você tiver essa informação.
+            "Exclusivo" só existe para heróis de raridade Lendário; deixe em branco se não for o
+            caso.
+          </p>
+          {draft.heroes.map((hero, i) => (
+            <div key={i} style={{ marginBottom: 10 }}>
+              <div className="hero-row">
+                <input
+                  type="text"
+                  list="heroes-list"
+                  placeholder="Nome"
+                  value={hero.name}
+                  onChange={(e) => updateHero(i, { name: e.target.value })}
+                />
+                <input
+                  type="number"
+                  placeholder="Nível"
+                  value={hero.level}
+                  onChange={(e) => updateHero(i, { level: Number(e.target.value) })}
+                />
+                <input
+                  type="number"
+                  placeholder="Estrelas"
+                  min={1}
+                  max={5}
+                  value={hero.stars}
+                  onChange={(e) => updateHero(i, { stars: Number(e.target.value) })}
+                />
+                <button type="button" className="secondary" onClick={() => removeHero(i)}>
+                  Remover
+                </button>
+              </div>
+              {hero.name.trim().length > 0 && hero.stars < 5 && (
+                <div className="grid-2" style={{ marginTop: -4 }}>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="Fragmentos atuais (opcional)"
+                    value={hero.shardsOwned ?? ''}
+                    onChange={(e) =>
+                      updateHero(i, {
+                        shardsOwned: e.target.value === '' ? undefined : Number(e.target.value),
+                      })
+                    }
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="Fragmentos p/ próxima estrela (opcional)"
+                    value={hero.shardsRequiredForNextStar ?? ''}
+                    onChange={(e) =>
+                      updateHero(i, {
+                        shardsRequiredForNextStar: e.target.value === '' ? undefined : Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+              )}
+              {hero.name.trim().length > 0 && (
+                <div style={{ marginTop: 4 }}>
+                  {KNOWN_GEAR_SLOTS.map((slotDef) => {
+                    const gear = findGearEntry(hero.name, slotDef.value)
+                    return (
+                      <div
+                        className="hero-row"
+                        style={{ gridTemplateColumns: '1fr 1fr 1fr', marginBottom: 4 }}
+                        key={slotDef.value}
+                      >
+                        <span className="muted" style={{ fontSize: 13, alignSelf: 'center' }}>
+                          {slotDef.label}
+                        </span>
+                        <select
+                          value={gear?.rarity ?? 'comum'}
+                          onChange={(e) =>
+                            setHeroGear(hero.name, slotDef.value, {
+                              rarity: e.target.value as HeroGearEntry['rarity'],
+                            })
+                          }
+                        >
+                          {KNOWN_GEAR_RARITIES.map((r) => (
+                            <option key={r.value} value={r.value}>
+                              {r.label}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          placeholder="Nível"
+                          value={gear?.level ?? ''}
+                          onChange={(e) =>
+                            setHeroGear(hero.name, slotDef.value, {
+                              level: e.target.value === '' ? 0 : Number(e.target.value),
+                            })
+                          }
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
+          {draft.heroes.length < 6 && (
+            <button type="button" className="secondary" onClick={addHero} style={{ marginBottom: 12 }}>
+              + herói
+            </button>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'pets' && (
+        <div>
+          <label>Pets (opcional)</label>
+          <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+            Captura simples de nome + nível, sem recomendação atrelada por enquanto — serve só
+            para dar visão completa da conta.
+          </p>
+          {(draft.petEntries ?? []).map((pet, i) => (
+            <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={i}>
+              <input
+                type="text"
+                list="pets-list"
+                placeholder="Nome (ex.: Hiena-das-cavernas)"
+                value={pet.name}
+                onChange={(e) => updatePetEntry(i, { name: e.target.value })}
+              />
+              <input
+                type="number"
+                min={1}
+                placeholder="Nível"
+                value={pet.level}
+                onChange={(e) => updatePetEntry(i, { level: Number(e.target.value) || 1 })}
+              />
+              <button type="button" className="secondary" onClick={() => removePetEntry(i)}>
+                Remover
+              </button>
+            </div>
+          ))}
+          <button type="button" className="secondary" onClick={addPetEntry} style={{ marginBottom: 12 }}>
+            + pet
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'chiefGear' && (
+        <div>
+          <label>Chief Gear (opcional)</label>
+          <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
+            Equipamento de comandante (Fornalha 22+), 6 slots: Elmo/Relógio (Lanceiro),
+            Casaco/Calça (Infantaria), Anel/Bengala (Atirador). Slot e raridade em texto livre —
+            nomenclatura ainda não confirmada contra o cliente em PT, digite como aparece na sua
+            tela.
+          </p>
+          {(draft.chiefGearEntries ?? []).map((entry, i) => (
+            <div className="hero-row" style={{ gridTemplateColumns: '1fr 1fr 1fr auto' }} key={i}>
+              <input
+                type="text"
+                list="chief-gear-slots-list"
+                placeholder="Slot (ex.: Elmo)"
+                value={entry.slot}
+                onChange={(e) => updateChiefGearEntry(i, { slot: e.target.value })}
+              />
+              <input
+                type="text"
+                list="chief-gear-tiers-list"
+                placeholder="Raridade (ex.: Roxo T1)"
+                value={entry.tier}
+                onChange={(e) => updateChiefGearEntry(i, { tier: e.target.value })}
+              />
+              <input
+                type="number"
+                min={0}
+                max={3}
+                placeholder="Estrelas"
+                value={entry.stars}
+                onChange={(e) => updateChiefGearEntry(i, { stars: Number(e.target.value) || 0 })}
+              />
+              <button type="button" className="secondary" onClick={() => removeChiefGearEntry(i)}>
+                Remover
+              </button>
+            </div>
+          ))}
+          <button type="button" className="secondary" onClick={addChiefGearEntry} style={{ marginBottom: 12 }}>
+            + peça de Chief Gear
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'alliance' && (
+        <div>
+          <label>Aliança</label>
+          <div className="grid-2">
+            <div>
+              <label className="muted">Ranking da aliança no servidor (opcional)</label>
+              <input
+                type="number"
+                min={1}
+                placeholder="ex.: 6"
+                value={draft.allianceRank ?? ''}
+                onChange={(e) =>
+                  update('allianceRank', e.target.value === '' ? undefined : Number(e.target.value))
+                }
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 10 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 0 }}>
+                <input
+                  type="checkbox"
+                  style={{ width: 'auto', margin: 0 }}
+                  checked={draft.allianceParticipatesAllEvents ?? false}
+                  onChange={(e) => update('allianceParticipatesAllEvents', e.target.checked)}
+                />
+                Aliança participa de todos os eventos
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Datalists ficam sempre montadas (fora das abas) porque o atributo
+          "list" de um input referencia o id em qualquer lugar do documento —
+          não precisam estar na mesma aba do campo que as usa, e mantê-las
+          sempre presentes evita ter que duplicá-las por aba. */}
       <datalist id="buildings-list">
         {KNOWN_BUILDINGS.map((b) => (
           <option key={b} value={b} />
@@ -643,227 +991,42 @@ export default function SnapshotForm({
           <option key={h} value={h} />
         ))}
       </datalist>
-
-      <label>Heróis favoritos</label>
-      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
-        Fragmentos (opcional) é só para o herói que você quer priorizar agora — informe os dois
-        números que a própria tela do herói mostra ("atual" / "necessário para a próxima estrela").
-        Deixe em branco pros demais. Equipamento (opcional) também fica aqui, um herói de cada vez —
-        raridade e nível de cada peça, se você tiver essa informação. "Exclusivo" só existe para
-        heróis de raridade Lendário; deixe em branco se não for o caso.
-      </p>
-      {draft.heroes.map((hero, i) => (
-        <div key={i} style={{ marginBottom: 10 }}>
-          <div className="hero-row">
-            <input
-              type="text"
-              list="heroes-list"
-              placeholder="Nome"
-              value={hero.name}
-              onChange={(e) => updateHero(i, { name: e.target.value })}
-            />
-            <input
-              type="number"
-              placeholder="Nível"
-              value={hero.level}
-              onChange={(e) => updateHero(i, { level: Number(e.target.value) })}
-            />
-            <input
-              type="number"
-              placeholder="Estrelas"
-              min={1}
-              max={5}
-              value={hero.stars}
-              onChange={(e) => updateHero(i, { stars: Number(e.target.value) })}
-            />
-            <button type="button" className="secondary" onClick={() => removeHero(i)}>
-              Remover
-            </button>
-          </div>
-          {hero.name.trim().length > 0 && hero.stars < 5 && (
-            <div className="grid-2" style={{ marginTop: -4 }}>
-              <input
-                type="number"
-                min={0}
-                placeholder="Fragmentos atuais (opcional)"
-                value={hero.shardsOwned ?? ''}
-                onChange={(e) =>
-                  updateHero(i, {
-                    shardsOwned: e.target.value === '' ? undefined : Number(e.target.value),
-                  })
-                }
-              />
-              <input
-                type="number"
-                min={0}
-                placeholder="Fragmentos p/ próxima estrela (opcional)"
-                value={hero.shardsRequiredForNextStar ?? ''}
-                onChange={(e) =>
-                  updateHero(i, {
-                    shardsRequiredForNextStar: e.target.value === '' ? undefined : Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-          )}
-          {hero.name.trim().length > 0 && (
-            <div style={{ marginTop: 4 }}>
-              {KNOWN_GEAR_SLOTS.map((slotDef) => {
-                const gear = findGearEntry(hero.name, slotDef.value)
-                return (
-                  <div
-                    className="hero-row"
-                    style={{ gridTemplateColumns: '1fr 1fr 1fr', marginBottom: 4 }}
-                    key={slotDef.value}
-                  >
-                    <span className="muted" style={{ fontSize: 13, alignSelf: 'center' }}>
-                      {slotDef.label}
-                    </span>
-                    <select
-                      value={gear?.rarity ?? 'comum'}
-                      onChange={(e) =>
-                        setHeroGear(hero.name, slotDef.value, {
-                          rarity: e.target.value as HeroGearEntry['rarity'],
-                        })
-                      }
-                    >
-                      {KNOWN_GEAR_RARITIES.map((r) => (
-                        <option key={r.value} value={r.value}>
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      placeholder="Nível"
-                      value={gear?.level ?? ''}
-                      onChange={(e) =>
-                        setHeroGear(hero.name, slotDef.value, {
-                          level: e.target.value === '' ? 0 : Number(e.target.value),
-                        })
-                      }
-                    />
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      ))}
-      {draft.heroes.length < 6 && (
-        <button type="button" className="secondary" onClick={addHero} style={{ marginBottom: 12 }}>
-          + herói
-        </button>
-      )}
-
-      <label>Pets (opcional)</label>
-      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
-        Captura simples de nome + nível, sem recomendação atrelada por enquanto — serve só para dar
-        visão completa da conta.
-      </p>
-      {(draft.petEntries ?? []).map((pet, i) => (
-        <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={i}>
-          <input
-            type="text"
-            list="pets-list"
-            placeholder="Nome (ex.: Hiena-das-cavernas)"
-            value={pet.name}
-            onChange={(e) => updatePetEntry(i, { name: e.target.value })}
-          />
-          <input
-            type="number"
-            min={1}
-            placeholder="Nível"
-            value={pet.level}
-            onChange={(e) => updatePetEntry(i, { level: Number(e.target.value) || 1 })}
-          />
-          <button type="button" className="secondary" onClick={() => removePetEntry(i)}>
-            Remover
-          </button>
-        </div>
-      ))}
-      <button type="button" className="secondary" onClick={addPetEntry} style={{ marginBottom: 12 }}>
-        + pet
-      </button>
+      <datalist id="troop-tiers-list">
+        {KNOWN_TROOP_TIERS.map((t) => (
+          <option key={t} value={t} />
+        ))}
+      </datalist>
       <datalist id="pets-list">
         {KNOWN_PETS.map((p) => (
           <option key={p} value={p} />
         ))}
       </datalist>
+      <datalist id="chief-gear-slots-list">
+        {KNOWN_CHIEF_GEAR_SLOTS.map((s) => (
+          <option key={s} value={s} />
+        ))}
+      </datalist>
+      <datalist id="chief-gear-tiers-list">
+        {KNOWN_CHIEF_GEAR_TIERS.map((t) => (
+          <option key={t} value={t} />
+        ))}
+      </datalist>
 
-      <label>Prédios da cidade (opcional)</label>
-      <p className="muted" style={{ marginTop: -2, fontSize: 12 }}>
-        Nível dos prédios além da Fornalha (que já tem campo próprio acima). Digite o nome como
-        aparece na sua tela — não precisa bater com a lista sugerida. Linhas ordenadas por nível
-        (maior primeiro).
-      </p>
-      {(draft.buildingLevels ?? [])
-        .map((building, originalIndex) => ({ building, originalIndex }))
-        .sort((a, b) => b.building.level - a.building.level)
-        .map(({ building, originalIndex }) => (
-        <div className="hero-row" style={{ gridTemplateColumns: '2fr 1fr auto' }} key={originalIndex}>
-          <input
-            type="text"
-            list="buildings-list"
-            placeholder="Nome (ex.: Centro de Comando)"
-            value={building.name}
-            onChange={(e) => updateBuildingEntry(originalIndex, { name: e.target.value })}
-          />
-          <input
-            type="number"
-            min={1}
-            placeholder="Nível"
-            value={building.level}
-            onChange={(e) => updateBuildingEntry(originalIndex, { level: Number(e.target.value) || 1 })}
-          />
-          <button type="button" className="secondary" onClick={() => removeBuildingEntry(originalIndex)}>
-            Remover
-          </button>
-        </div>
-      ))}
-      <button type="button" className="secondary" onClick={addBuildingEntry} style={{ marginBottom: 12 }}>
-        + prédio
-      </button>
+      {/* Rodapé sempre visível, fora das abas — dúvida do dia + salvar não
+          dependem de nenhum domínio específico e precisam ficar acessíveis
+          de qualquer aba. */}
+      <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--surface-2)' }}>
+        <label>Dúvida do dia (opcional)</label>
+        <textarea
+          rows={2}
+          value={draft.weeklyQuestion}
+          onChange={(e) => update('weeklyQuestion', e.target.value)}
+        />
 
-      <label>Aliança</label>
-      <div className="grid-2">
-        <div>
-          <label className="muted">Ranking da aliança no servidor (opcional)</label>
-          <input
-            type="number"
-            min={1}
-            placeholder="ex.: 6"
-            value={draft.allianceRank ?? ''}
-            onChange={(e) =>
-              update('allianceRank', e.target.value === '' ? undefined : Number(e.target.value))
-            }
-          />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 10 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 0 }}>
-            <input
-              type="checkbox"
-              style={{ width: 'auto', margin: 0 }}
-              checked={draft.allianceParticipatesAllEvents ?? false}
-              onChange={(e) => update('allianceParticipatesAllEvents', e.target.checked)}
-            />
-            Aliança participa de todos os eventos
-          </label>
-        </div>
+        <button type="submit" disabled={submitting}>
+          {submitting ? 'Salvando...' : 'Salvar atualização'}
+        </button>
       </div>
-
-      <label>Dúvida do dia (opcional)</label>
-      <textarea
-        rows={2}
-        value={draft.weeklyQuestion}
-        onChange={(e) => update('weeklyQuestion', e.target.value)}
-      />
-
-      <button type="submit" disabled={submitting}>
-        {submitting ? 'Salvando...' : 'Salvar atualização'}
-      </button>
     </form>
   )
 }

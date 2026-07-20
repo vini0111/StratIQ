@@ -61,6 +61,7 @@ export function snapshotFromRow(row: any): WeeklySnapshot {
     buildingLevels: row.building_levels ?? [],
     allianceRank: row.alliance_rank ?? undefined,
     allianceParticipatesAllEvents: row.alliance_participates_all_events ?? undefined,
+    chiefGearEntries: row.chief_gear_entries ?? [],
     createdAt: row.created_at,
   }
 }
@@ -100,5 +101,6 @@ export function snapshotToRow(
     building_levels: snapshot.buildingLevels ?? [],
     alliance_rank: snapshot.allianceRank ?? null,
     alliance_participates_all_events: snapshot.allianceParticipatesAllEvents ?? null,
+    chief_gear_entries: snapshot.chiefGearEntries ?? [],
   }
 }

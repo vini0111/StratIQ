@@ -12,6 +12,7 @@ import vipNearLevelUp from './vip_near_level_up.json'
 import acceleratorHoardingConstruction from './accelerator_hoarding_construction.json'
 import acceleratorHoardingResearch from './accelerator_hoarding_research.json'
 import acceleratorHoardingTraining from './accelerator_hoarding_training.json'
+import acceleratorHoardingGeneral from './accelerator_hoarding_general.json'
 import idleConstructionQueue from './idle_construction_queue.json'
 import idleConstructionQueue2 from './idle_construction_queue_2.json'
 import idleResearchQueue from './idle_research_queue.json'
@@ -46,14 +47,17 @@ import heroShardsNearStarUpgrade from './hero_shards_near_star_upgrade.json'
 import luckyWheelFeaturedHeroContext from './lucky_wheel_featured_hero_context.json'
 import heroGearMasteryForgingReady from './hero_gear_mastery_forging_ready.json'
 import heroGearSlotImbalance from './hero_gear_slot_imbalance.json'
+import gemsApproachingLuckyWheelMax from './gems_approaching_lucky_wheel_max.json'
 
 export const strategyCards = [
   saveGemsBaselineReserve,
   spendGemsLuckyWheel,
+  gemsApproachingLuckyWheelMax,
   vipNearLevelUp,
   acceleratorHoardingConstruction,
   acceleratorHoardingResearch,
   acceleratorHoardingTraining,
+  acceleratorHoardingGeneral,
   idleConstructionQueue,
   idleConstructionQueue2,
   idleResearchQueue,

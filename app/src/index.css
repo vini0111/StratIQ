@@ -168,3 +168,42 @@ button:disabled {
   color: var(--muted);
   margin: 0 0 20px;
 }
+
+/* Navegação por domínio dentro do check-in (vigésima sexta rodada) —
+   inspirada na estrutura de abas do WoStools. Tira de scroll horizontal em
+   telas estreitas (mobile) em vez de sidebar vertical, porque o container
+   principal (#root) é limitado a 720px e o check-in é usado com frequência
+   pelo celular — ver docs/BACKLOG-v1.md. */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--surface-2);
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-btn {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-radius: 8px 8px 0 0;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.tab-btn:hover:not(.active) {
+  color: var(--text);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--accent);
+}

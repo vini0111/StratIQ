@@ -174,3 +174,34 @@ export const KNOWN_GEAR_RARITIES: { value: GearRarity; label: string }[] = [
   { value: 'epico', label: 'Épico' },
   { value: 'lendario', label: 'Lendário' },
 ]
+
+// Chief Gear (Fornalha 22) — 6 slots, traduzidos do inglês nesta pesquisa
+// (2026-07-20), NÃO confirmados contra o cliente em PT (diferente de Hero
+// Gear, onde o jogador confirmou a nomenclatura). Por isso ficam como
+// sugestão (datalist), texto livre, mesmo tratamento dado a KNOWN_BUILDINGS
+// — ajustar se divergirem do texto real do jogo. Fonte: whiteoutsurvival.wiki
+// (Chief Gear). Ver docs/KNOWLEDGE-001-Game-Mechanics.md.
+export const KNOWN_CHIEF_GEAR_SLOTS = [
+  'Elmo',
+  'Relógio',
+  'Casaco',
+  'Calça',
+  'Anel',
+  'Bengala',
+]
+
+// Raridade em cores + sub-tiers, também não confirmada contra o cliente em
+// PT. Fonte: whiteoutsurvival.wiki (Chief Gear).
+export const KNOWN_CHIEF_GEAR_TIERS = [
+  'Verde',
+  'Azul',
+  'Roxo',
+  'Roxo T1',
+  'Dourado',
+  'Dourado T1',
+  'Dourado T2',
+  'Vermelho',
+  'Vermelho T1',
+  'Vermelho T2',
+  'Vermelho T3',
+]

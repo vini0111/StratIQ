@@ -14,6 +14,7 @@ import {
 } from '../lib/aiAnalysis'
 import SnapshotForm from '../components/SnapshotForm'
 import DecisionCenter from '../components/DecisionCenter'
+import UpcomingMilestones from '../components/UpcomingMilestones'
 import HistorySparkline from '../components/HistorySparkline'
 import HistoryTable from '../components/HistoryTable'
 import Brand from '../components/Brand'
@@ -220,6 +221,10 @@ export default function Dashboard({
 
       {!loading && latest && semaphore && (
         <DecisionCenter semaphore={semaphore} recommendations={recommendations} />
+      )}
+
+      {!loading && latest && (
+        <UpcomingMilestones furnaceLevel={latest.furnaceLevel} snapshots={snapshots} />
       )}
 
       {!loading && latest?.weeklyQuestion && (

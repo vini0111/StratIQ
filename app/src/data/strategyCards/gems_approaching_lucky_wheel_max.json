@@ -1,0 +1,14 @@
+{
+  "id": "GEMS_APPROACHING_LUCKY_WHEEL_MAX",
+  "name": "Gemas se aproximando do valor de giro completo",
+  "domain": "economy",
+  "priority": "medium",
+  "conditions": [
+    { "field": "gems", "op": "gte", "value": 120000 },
+    { "field": "gems", "op": "lt", "value": 159000 }
+  ],
+  "recommendation": "Suas gemas já passam de 120.000 — você está chegando perto do valor para maximizar a Roda da Sorte (159.000, 120 giros). Se não tiver uma prioridade mais urgente para gastar antes disso, vale segurar até a próxima rotação do evento.",
+  "explanation": "120 giros completos custam 159.000 gemas (fonte: docs/KNOWLEDGE-001-Game-Mechanics.md, seção Lucky Wheel). Esta card avisa antecipadamente, a partir de ~75% do valor total, para o jogador já planejar não gastar as gemas em outra coisa — complementa SPEND_GEMS_LUCKY_WHEEL, que só dispara quando o evento está ativo E o valor já foi atingido (esta aqui dispara independente do evento estar ativo). Adicionada na vigésima quarta rodada a partir de padrão observado na conta real: gemas cresceram de 69.013 para 144.001 em 2 semanas sem nenhum gasto detectado em 13 check-ins.",
+  "impact": "medium",
+  "confidence": 0.6
+}

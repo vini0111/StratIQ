@@ -13,6 +13,19 @@
 
 Conhecimento do jogo usado para calibrar as Strategy Cards (`app/src/data/strategyCards/`). Cada fato aqui tem fonte e é datado — meta e mecânica de eventos mudam com atualizações do jogo, então isto **não é estático**. Quando uma Strategy Card usa um número ou nome específico, ele deve rastrear até uma entrada aqui.
 
+## Observações da conta real (Estado 4465) — síntese de 13 check-ins, 2026-07-03 a 2026-07-20
+
+Diferente do resto deste documento (fontes externas/guias), esta seção registra **padrões observados diretamente nos dados do jogador**, com o objetivo de calibrar cards com base em comportamento real em vez de só heurística de guia. Revisar/atualizar a cada janela de 2-3 semanas de novos dados.
+
+- **Ritmo de Fornalha:** 18→22 em 17 dias. Não é constante — acelerou de 18→19 (3 dias) e 20→21 (2 dias), mas desacelerou em 21→22 (8 dias), consistente com custo crescente por nível nas fornalhas mais altas.
+- **VIP:** subiu de 3→4 rápido (2 dias, 2026-07-05), depois ficou parado em nível 4 as outras ~2 semanas inteiras, acumulando XP lentamente (0 → 13.610 de 30.000 necessários, ~45%). Confirma o padrão já documentado (XP requerido cresce muito por nível) — não é sinal de estagnação do jogador, é a curva normal do jogo.
+- **Poder:** mais que dobrou no período (5,38M → 12,62M, +135%), com um salto grande nos últimos 3 dias (9,96M → 12,62M) coincidindo com desbloqueio do tier de tropa VIII (Elite) em 2026-07-20 — sinal de que trocas de tier de tropa têm impacto desproporcional no Poder comparado a crescimento incremental.
+- **Gemas e aceleradores: padrão de acúmulo, não de gasto.** Gemas subiram monotonicamente o período inteiro (69.013 → 144.001, ~+2.800 a ~+4.400/dia, nunca caiu) — nenhum gasto detectado em 13 check-ins. Os 4 aceleradores rastreados também só cresceram: Geral 7,8→24,5 dias, Treino 3,1→8,7, Construção 5,3→10, Pesquisa 3,8→8,2, Cura 1,5→3,8. Nenhum indício de uso ativo desses estoques no período.
+- **Aliança:** ranking melhorou de 6 para 5 (entre os check-ins de 2026-07-10 e 2026-07-12), participação em todos os eventos mantida o período inteiro.
+- **Pets, Equipamento e Prédios (correção 2026-07-20):** a leitura inicial via contagem de itens (3 pets, 26 peças, 17 prédios, constante desde 2026-07-09/10) sugeria que os dados tinham parado de mudar — **estava errada**. Conferido o conteúdo (não só a contagem): os três domínios são atualizados a cada check-in normalmente. Pets sobem de nível a cada poucos dias (ex.: Hiena-das-cavernas 5→10→20→30→40, Boi Almiscarado 7→19→30→38→40→48), equipamento de herói evolui em nível e às vezes em raridade (ex.: Molly Cinto raro nível 5 → épico nível 10 em 2026-07-17), prédios sobem de nível junto com a Fornalha. A contagem de itens fica estável porque o jogador está atualizando linhas já existentes, não adicionando linhas novas — não porque os dados pararam de mudar. Lição: monitorar só `jsonb_array_length` é insuficiente para avaliar se um domínio está "vivo"; é preciso olhar o conteúdo.
+- **2º construtor:** ficou ocioso (`currentBuilding2` vazio) em 3 dos 13 check-ins, mas sempre com `construction2Maxed` marcado — ou seja, a supressão de falso positivo implementada na décima quinta rodada está funcionando corretamente na prática (nenhum aviso indevido de fila ociosa nesses casos).
+- **Eventos:** `Rally do Herói`, `Batalha da Forja`, `Campeonato da aliança` e `Mobilização da Aliança` aparecem com muito mais frequência que os demais — possivelmente eventos de fundo/quase-permanentes em vez de limitados, diferente de nomes que aparecem uma única vez (Torneio de pesca, A vingança de Gina, Trabalhar horas extras, Planejar sua cidade, Novas tecnologias, o pacote temático de futebol). Ainda não formalizado — ver Strategy Cards de eventos antes de tratar isso como regra.
+
 ## Eventos
 
 ### Lucky Wheel
@@ -101,6 +114,20 @@ Enhancement (nível): sobe até 100; peças Douradas/Lendárias no nível 20+ de
 **Nota 2026-07-09 (décima nona rodada):** o app passou a capturar equipamento por herói+slot+raridade+nível no check-in, mesmo padrão de captura simples usado em Pets — parte da mesma expansão de escopo pedida pelo usuário ("visão completa da conta"). Sem Strategy Card atrelada ainda.
 
 Fonte: [BlueStacks — Hero Gear Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-gear-guide-en.html), [Whiteout Survival Wiki — Hero Gear](https://www.whiteoutsurvival.wiki/hero-gears/hero-gear/), [ldshop.gg — Hero Gear Guide](https://www.ldshop.gg/blog/guide/whiteout-survival-hero-gear-guide.html) (pesquisado em 2026-07-09; nomenclatura de raridade confirmada pelo jogador contra o cliente em PT no mesmo dia).
+
+## Chief Gear (equipamento de comandante)
+
+Desbloqueado na Fornalha 22 (ver tabela de marcos na seção Fornalha) — diferente de Hero Gear (por herói), Chief Gear é account-wide, ligado ao comandante/perfil, não a um herói específico. 6 slots que desbloqueiam juntos, organizados em pares por tipo de tropa: Elmo e Relógio (Lanceiro), Casaco e Calça (Infantaria), Anel e Bengala (Atirador).
+
+Raridade em cores + sub-tiers dentro de cada cor, progressão mais granular que Hero Gear: Verde < Azul < Roxo < Roxo T1 < Dourado < Dourado T1 < Dourado T2 < Vermelho < Vermelho T1 < Vermelho T2 < Vermelho T3. Dentro de cada cor/tier, a peça também acumula estrelas (0 a 3) antes de avançar para a próxima cor/tier. Bônus de conjunto (set bonus) em 3 peças e 6 peças da mesma qualidade — dica recorrente dos guias é manter todas as peças alinhadas na mesma qualidade em vez de puxar uma peça muito à frente das outras (mesmo princípio geral já observado em Hero Gear, vigésima terceira rodada: peças de raridades diferentes não são diretamente comparáveis).
+
+Materiais de upgrade: Liga Endurecida (Hardened Alloy), Solução de Polimento (Polishing Solution), Plantas de Design (Design Plans), Âmbar Lunar (Lunar Amber) — nomes traduzidos do inglês nesta pesquisa, não confirmados contra o cliente em PT.
+
+Domínio relacionado, desbloqueado depois (Fornalha 25): Chief Charms — 16 níveis, 3 encantos independentes por peça organizados por tipo de tropa, materiais próprios (Charm Design, Charm Guide, Jewel Secrets). Não modelado ainda no app (fora de escopo desta rodada).
+
+**Nota 2026-07-20 (vigésima quinta rodada):** o app passou a capturar Chief Gear por slot+raridade+estrelas no check-in (`ChiefGearEntry`), mesmo padrão de captura simples usado nos demais domínios da expansão "visão completa da conta" (Pets, Hero Gear, Prédios, Aliança). Slot e raridade ficam como texto livre + sugestão (não lista fechada) porque, diferente de Hero Gear, ainda não há confirmação do jogador contra o cliente em PT — mesma cautela usada em Prédios da Cidade (vigésima rodada). Sem Strategy Card atrelada ainda.
+
+Fonte: [Whiteout Survival Wiki — Chief Gear](https://www.whiteoutsurvival.wiki/chief-gear/chief-gear/), [ldshop.gg — Chief Gear Guide](https://www.ldshop.gg/blog/guide/chief-gear-guide.html), [BlueStacks — Chief Gear Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-chief-gear-guide-en.html), [Heaven Guardian — Chief Charm Secrets/Upgrade Chart](https://heaven-guardian.com/chief-charm-secrets-upgrade-chart/), [whiteoutdata.com — Chief Charms](https://whiteoutdata.com/items/chief-charms/) (pesquisado em 2026-07-20; nenhuma nomenclatura confirmada contra o cliente em PT ainda).
 
 ## Aliança
 

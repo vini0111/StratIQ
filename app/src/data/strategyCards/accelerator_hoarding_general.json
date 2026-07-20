@@ -1,0 +1,11 @@
+{
+  "id": "ACCELERATOR_HOARDING_GENERAL",
+  "name": "Evitar acúmulo de aceleradores gerais",
+  "domain": "economy",
+  "priority": "medium",
+  "conditions": [{ "field": "accelGeneralDays", "op": "gt", "value": 20 }],
+  "recommendation": "Você tem mais de 20 dias de aceleradores gerais parados. Use parte deles em qualquer fila ativa (construção, pesquisa ou treino).",
+  "explanation": "Aceleradores gerais servem para qualquer fila, então acumular é ainda menos justificável que nas categorias específicas. Mesmo limiar das cards de acúmulo por categoria (Construção/Pesquisa/Treino) — adicionada na vigésima quarta rodada porque só essas três tinham cobertura, e Geral era justamente o maior estoque observado na conta real (Estado 4465): 24,5 dias acumulados sem uso detectado em 2 semanas de check-ins. Ver docs/KNOWLEDGE-001-Game-Mechanics.md.",
+  "impact": "medium",
+  "confidence": 0.7
+}

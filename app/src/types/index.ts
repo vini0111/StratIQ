@@ -94,6 +94,22 @@ export interface BuildingLevelEntry {
   level: number
 }
 
+// Chief Gear (equipamento de comandante, desbloqueado na Fornalha 22) — 6
+// slots que desbloqueiam juntos: Elmo/Relógio (Lanceiro), Casaco/Calça
+// (Infantaria), Anel/Bengala (Atirador). Progride por raridade em cores
+// (Verde < Azul < Roxo < Roxo T1 < Dourado < Dourado T1 < Dourado T2 <
+// Vermelho < Vermelho T1 < Vermelho T2 < Vermelho T3) e, dentro de cada cor,
+// estrelas (0-3). Slot e raridade ficam como texto livre (não lista fechada
+// como em Hero Gear) porque, diferente do Equipamento de Herói, ainda não
+// temos confirmação do jogador contra o cliente em PT — mesma cautela usada
+// em Prédios da Cidade. Ver docs/KNOWLEDGE-001-Game-Mechanics.md (seção
+// Chief Gear) e docs/BACKLOG-v1.md (vigésima quinta rodada).
+export interface ChiefGearEntry {
+  slot: string
+  tier: string
+  stars: number
+}
+
 export interface WeeklySnapshot {
   id?: string
   profileId: string
@@ -146,6 +162,9 @@ export interface WeeklySnapshot {
   // (vigésima primeira rodada, última desta expansão de escopo).
   allianceRank?: number
   allianceParticipatesAllEvents?: boolean
+  // Chief Gear (opcional, captura simples por slot). Ver docs/BACKLOG-v1.md
+  // (vigésima quinta rodada).
+  chiefGearEntries?: ChiefGearEntry[]
   createdAt?: string
 }
 
